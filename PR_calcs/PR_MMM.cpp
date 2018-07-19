@@ -8,6 +8,7 @@
 */
 
 // Include various dependencies 
+#include <stdlib.h>
 #include <fstream>
 #include <cmath>
 #include <iostream>
@@ -87,28 +88,30 @@ int Seats_max_cutoff;
 
 int total_votes=0;
 int i=0, j=0;
-
-for( i = 1; i < argc; i++ )
-  { FILE_in += argv[i]; }
-
-// I/O filestream
-cout << "\n Input file name is read as: " << FILE_in << endl;
-cout << "\n Enter output FILE name: ";
-cin >> FILE_out;
-
 bool count_NotA;
-cout << "\n\n  Should NotA (None of the Above) votes be counted? (enter [y/n]): " << endl ;
-cin  >> prompt;
 
-if ( prompt == "Y" || prompt == "y")
-  { count_NotA = true; }
-else if ( prompt == "N" || prompt == "n")
-  { count_NotA = false; }
-else
-  { 
-  cout << "Input not understood. Exiting." << endl;
-  exit(1);
-  }
+// for( i = 1; i < argc; i++ )
+//  { FILE_in += argv[i]; }
+// I/O filestream
+// cout << "\n Input file name is read as: " << FILE_in << endl;
+// cout << "\n Enter output FILE name: ";
+// cin >> FILE_out;
+// cout << "\n\n  Should NotA (None of the Above) votes be counted? (enter [y/n]): " << endl ;
+// cin  >> prompt;
+// if ( prompt == "Y" || prompt == "y")
+//   { count_NotA = true; }
+// else if ( prompt == "N" || prompt == "n")
+//   { count_NotA = false; }
+// else
+//   { 
+//   cout << "Input not understood. Exiting." << endl;
+//   exit(1);
+//   }
+
+
+FILE_in = "./raw_results_2011.txt";
+FILE_out= "./test_out.txt";
+count_NotA=false;
 
 
 
@@ -204,7 +207,36 @@ int array_size = Num_parties*2*Seats_total_init; // array of quotients to be ran
 quotient temp1;
 quotient temp2;
 
+
+// ---- first sort by "assigned" to bring the 308 constituency seats to the front of the list
 for (i=0; i<array_size; i++)
+  {
+  for (j=i+1; j<array_size; j++)
+    {
+    if( Total_quotient_list[j].assigned && !Total_quotient_list[i].assigned   )
+      {
+      temp1                   = Total_quotient_list[i];
+      Total_quotient_list[i]  = Total_quotient_list[j];
+      Total_quotient_list[j]  = temp1;
+      }
+    }
+  }
+
+// --- then sort the first 308 quotients by value (not actually necessary, but done for tidiness)
+for (i=0; i<Seats_total_init; i++)
+  {
+  for (j=i+1; j<Seats_total_init; j++)
+    {
+    if(  Total_quotient_list[j].value > Total_quotient_list[i].value  )
+      {
+      temp1                   = Total_quotient_list[i];
+      Total_quotient_list[i]  = Total_quotient_list[j];
+      Total_quotient_list[j]  = temp1;
+      }
+    }
+  }
+// --- then sort the remaining quotients (this *IS* necessary)
+for (i=Seats_total_init; i<array_size; i++)
   {
   for (j=i+1; j<array_size; j++)
     {
@@ -216,6 +248,19 @@ for (i=0; i<array_size; i++)
       }
     }
   }
+
+// ----------- double-check that the quotient list looks right:
+datout << "\n Checking the quotient list:\n";
+
+for (i=0; i<array_size; i++)
+  {
+  datout << Total_quotient_list[i].value    << "\t"; 
+  datout << Total_quotient_list[i].jval     << "\t"; 
+  datout << Total_quotient_list[i].assigned << "\t"; 
+  datout << Total_quotient_list[i].party_att << endl; 
+  } 
+exit(0);
+
 // Total_quotient_list IS NOW ORDERED first by "assigned" status, and then by "value" 
 // it has size "array_size". 
 // only the first 308 quotients are "assigned"
