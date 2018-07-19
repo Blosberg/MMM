@@ -321,6 +321,8 @@ for(j=0;j<Num_parties;j++)
 if (  total_seats_xcheck != total_seats_assigned )
   {//sanity check.
   cout << "\n ERROR: inconsistent total seat count in should_terminate function.\n";
+  cout << " total_seats_xcheck   = " << total_seats_xcheck   << endl;
+  cout << " total_seats_assigned = " << total_seats_assigned << endl;
   exit(1);
   }
 
