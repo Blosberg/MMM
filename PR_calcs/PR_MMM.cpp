@@ -1,8 +1,8 @@
 /*
- AUTHOR : BRENDAN OSBERG: July 2016  
- You are free to copy and redistribute this script, provided you cite and credit 
+ AUTHOR : BRENDAN OSBERG: Begun July 2016  
+ You are free to copy and redistribute this script, provided you cite and give credit 
 
- projects proportional seating arrangements for the MMM model,
+ This script makes projections for proportional seating arrangements for the MMM model,
  based on raw FPP input.
 
 */
@@ -18,7 +18,7 @@
 using namespace std;
 
 
-// Define class object "quotient"  (Q objects described in paper)
+// --- Define class object "quotient"  (Q objects described in paper)
 
 class quotient{   
   public:
@@ -36,11 +36,10 @@ quotient::quotient()
   assigned  = false;
   party_att ='\0';
   }
-
 //----------------------------------------------
 
 
-// Define class object "party" 
+// --- Define class object "party" 
 class party{
 
   public:
@@ -68,6 +67,9 @@ party::party()
 
 
 bool should_terminate ( quotient * Total_quotient_list, party * all_parties, int qi, int Seats_total_init, int & total_seats_assigned, int Seats_max_cutoff, int Num_parties, int total_votes, bool count_NotA );
+
+double seats_overrepresented (const int seats_assigned, const int total_seats_assigned, const int votes, const int total_votes );
+
 
 //******************************************************************
 
@@ -137,7 +139,7 @@ else
     datin >>  all_parties[i].seats_initial;  
     datin >>  all_parties[i].votes;
 
-    all_parties[i].seats_assigned = all_parties[i].seats_initial;
+    all_parties[i].seats_assigned = 0;
 
     Seats_total_init += all_parties[i].seats_initial;
     total_votes      += all_parties[i].votes;
@@ -222,7 +224,7 @@ for (i=0; i<array_size; i++)
     }
   }
 
-// --- then sort the first 308 quotients by value (not actually necessary, but done for tidiness)
+// --- then sort the first 308 quotients by value (not actually necessary, but done for tidiness and visualization)
 for (i=0; i<Seats_total_init; i++)
   {
   for (j=i+1; j<Seats_total_init; j++)
@@ -235,6 +237,7 @@ for (i=0; i<Seats_total_init; i++)
       }
     }
   }
+
 // --- then sort the remaining quotients (this *IS* necessary)
 for (i=Seats_total_init; i<array_size; i++)
   {
@@ -250,16 +253,17 @@ for (i=Seats_total_init; i<array_size; i++)
   }
 
 // ----------- double-check that the quotient list looks right:
-datout << "\n Checking the quotient list:\n";
+// datout << "\n Checking the quotient list:\n";
+// 
+// for (i=0; i<array_size; i++)
+//   {
+//   datout << Total_quotient_list[i].value    << "\t"; 
+//   datout << Total_quotient_list[i].jval     << "\t"; 
+//   datout << Total_quotient_list[i].assigned << "\t"; 
+//   datout << Total_quotient_list[i].party_att << endl; 
+//   } 
+// exit(0);
 
-for (i=0; i<array_size; i++)
-  {
-  datout << Total_quotient_list[i].value    << "\t"; 
-  datout << Total_quotient_list[i].jval     << "\t"; 
-  datout << Total_quotient_list[i].assigned << "\t"; 
-  datout << Total_quotient_list[i].party_att << endl; 
-  } 
-exit(0);
 
 // Total_quotient_list IS NOW ORDERED first by "assigned" status, and then by "value" 
 // it has size "array_size". 
@@ -267,8 +271,7 @@ exit(0);
 
 //  NOW ASSIGN SEATS IN ORDER 
 int total_seats_assigned  = 0; 
-
-// @@ check with gdb the status of these quotients
+bool allocated;
 
 for (i=0; i<array_size; i++)
   {
@@ -277,27 +280,29 @@ for (i=0; i<array_size; i++)
      {
      break;
      } 
+  allocated = false;
 
-  if ( ! Total_quotient_list[i].assigned ) 
-     {
-     // @@ check gdb the first time this happens, i should be 308
-     for(  j=0;j<Num_parties;j++)
-       {
-       if( Total_quotient_list[i].party_att == all_parties[j].name)
-         {
-         if( Total_quotient_list[i].party_att != "Oth")
-           { //---- party 'other' doesn't get seats, obviously.
-           
-           all_parties[j].seats_assigned++;
-           total_seats_assigned++;  
-   
-           }//--finished assigning to seat to party (provided it wasn't "Oth")
-         }//--finished "if divisor list name matches"    
-       }//--- finished scanning through the parties
+  for(  j=0;j<Num_parties;j++)
+    {
+    if( Total_quotient_list[i].party_att == all_parties[j].name)
+      {
 
-     Total_quotient_list[i].assigned = true;
-     }//--- finished checking if quotient is already assigned
+      allocated = true;
+      if( Total_quotient_list[i].party_att != "Oth")
+        { //---- party 'other' doesn't get seats, obviously.
+        all_parties[j].seats_assigned++;
+        total_seats_assigned++;  
+        }//--finished assigning to seat to party (provided it wasn't "Oth")
+      }//--finished "if divisor list name matches"    
+    }//--- finished scanning through the parties
 
+  if( !allocated )
+    {
+    cout << "\n ERROR: failed to assign seat to party " << Total_quotient_list[i].party_att << " Exiting ";
+    exit(1);
+    }
+
+  Total_quotient_list[i].assigned = true;
   }//---finished scanning through the array of quotients (we should never get this far.)
 
 finished_allocation:
@@ -363,16 +368,15 @@ for(j=0;j<Num_parties;j++)
     }
   }
 
-if (  total_seats_xcheck != total_seats_assigned )
-  {//sanity check.
+if (  total_seats_xcheck != total_seats_assigned )//sanity check.
+  {
   cout << "\n ERROR: inconsistent total seat count in should_terminate function.\n";
   cout << " total_seats_xcheck   = " << total_seats_xcheck   << endl;
   cout << " total_seats_assigned = " << total_seats_assigned << endl;
   exit(1);
   }
 
-// check if we've reached cutoff 
-if ( total_seats_assigned >= Seats_max_cutoff )
+if ( total_seats_assigned >= Seats_max_cutoff )// If we've reached cutoff, then terminate
     {
     cout << "\n Parliament size reached cutoff threshold. Terminating at seat #";
     cout << total_seats_assigned;
@@ -405,7 +409,9 @@ else
 
     result = false;
 
-    if( all_parties[qi].seats_assigned >= all_parties[qi].seats_initial && all_parties[qi].most_over_represented)
+   
+ // here is the segfault @@@ 
+ if( all_parties[qi].seats_assigned > all_parties[qi].seats_initial && all_parties[qi].most_over_represented)
        {
  
        result = true;
@@ -419,5 +425,12 @@ else
 return result;
 }
 
+//-------------------------------
+double seats_overrepresented (const int seats_assigned, const int total_seats_assigned, const int votes, const int total_votes )
+{
+double result;
 
+result = double(seats_assigned) -  double(total_seats_assigned)*(double(votes)/double(total_votes) ) ;
 
+return result;
+}
