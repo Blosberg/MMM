@@ -65,13 +65,13 @@ party::party()
   }
 
 
+bool should_terminate ( const  quotient * Total_quotient_list, party * all_parties, const int qi, const int Seats_total_init, int & total_seats_assigned, const int Seats_max_cutoff, const int Num_parties, const int total_votes, const bool count_NotA );
 
-bool should_terminate ( quotient * Total_quotient_list, party * all_parties, int qi, int Seats_total_init, int & total_seats_assigned, int Seats_max_cutoff, int Num_parties, int total_votes, bool count_NotA );
 
 double seats_overrepresented (const int seats_assigned, const int total_seats_assigned, const int votes, const int total_votes );
 
 
-//******************************************************************
+// --- Begin main *******************************************************
 
 int main(int argc, char *argv[])
 {
@@ -117,7 +117,7 @@ count_NotA=false;
 
 
 
-// Populate party list and read in member data from input file:
+// --- Populate party list and read in member data from input file:
 
 int Num_parties=6;    // "Other" is treated as a party (although awarded no seats)
 party all_parties[Num_parties];
@@ -148,7 +148,7 @@ else
   }
 Seats_max_cutoff = 2*Seats_total_init;
  
-// populate each party's list of quotients 
+// --- populate each party's list of quotients 
 quotient Total_quotient_list[Num_parties*2*Seats_total_init];
 
 for(i=0;i<Num_parties;i++)
@@ -183,7 +183,7 @@ for(i=0;i<Num_parties;i++)
 // by "assigned" status, and then by quotient value
 
 
-// CHECK WHICH PARTY is the most OVER-REPRESENTED. --------------
+// --- CHECK WHICH PARTY is the most OVER-REPRESENTED. --------------
 
 int    most_OR_index=0;  // index of the Most over-represented party
 double most_OR=0.0;
@@ -202,7 +202,7 @@ for(i=0;i<Num_parties;i++)
 
 all_parties[most_OR_index].most_over_represented=true;
 
-// SORT the quotients list ----------
+// --- SORT the quotients list ----------
 
 int array_size = Num_parties*2*Seats_total_init; // array of quotients to be ranked.
 
@@ -210,7 +210,7 @@ quotient temp1;
 quotient temp2;
 
 
-// ---- first sort by "assigned" to bring the 308 constituency seats to the front of the list
+// --- first sort by "assigned" to bring the 308 constituency seats to the front of the list
 for (i=0; i<array_size; i++)
   {
   for (j=i+1; j<array_size; j++)
@@ -336,20 +336,20 @@ return 0;
 
 // =================   DEFINE FUNCTIONS   ===============
 
-bool should_terminate ( quotient * Total_quotient_list, party * all_parties, int qi, int Seats_total_init , int & total_seats_assigned, int Seats_max_cutoff, int Num_parties, int total_votes , bool  count_NotA )
+bool should_terminate ( const quotient * Total_quotient_list, party * all_parties, const int qi, const int Seats_total_init, int & total_seats_assigned, const int Seats_max_cutoff, const int Num_parties, const int total_votes, const bool count_NotA )
 {
 int i=0, j=0;
 int total_seats_xcheck = 0;
 bool underrep_found=false;
 bool result = false;
 
-// check if we've allocated all Const. seats yet. If not, keep going.
+// --- check if we've allocated all Const. seats yet. If not, keep going.
 if ( qi < Seats_total_init )
   { 
     return(false); 
   }
 
-// x-check total number of seats, and get the next candidate party
+// --- x-check total number of seats, and get the next candidate party
 bool next_found=false;
 int  next_index=-1; 
 for(j=0;j<Num_parties;j++)
@@ -368,9 +368,10 @@ for(j=0;j<Num_parties;j++)
     }
   }
 
-if (  total_seats_xcheck != total_seats_assigned )//sanity check.
+if (  total_seats_xcheck != total_seats_assigned || !next_found )//sanity check.
   {
-  cout << "\n ERROR: inconsistent total seat count in should_terminate function.\n";
+  cout << "\n ERROR: in should_terminate function.\n";
+  cout << " inconsistent total seat count, or next allocation not found. \n "; 
   cout << " total_seats_xcheck   = " << total_seats_xcheck   << endl;
   cout << " total_seats_assigned = " << total_seats_assigned << endl;
   exit(1);
@@ -384,7 +385,7 @@ if ( total_seats_assigned >= Seats_max_cutoff )// If we've reached cutoff, then 
     return ( true ); 
     }
 
-//========================================================= 
+// ------------- 
 
 if ( count_NotA ) // counting "None of the Above" means each party's share  
   { // exit if no party remains under-represented by more than an integer 
@@ -397,7 +398,7 @@ if ( count_NotA ) // counting "None of the Above" means each party's share
       if ( ((all_parties[j].seats_assigned +1 )/total_seats_assigned) <  (all_parties[j].votes /total_votes) )
          { // in this case, under-representation of a party exceeds a full integer 
            // (meaning this party has the right to claim another full seat)  
-           // therefore,  do not terminate seat allocation process. 
+           // therefore,  do not terminate seat allocation process yet. 
          result = false;
          break; 
          }
@@ -410,16 +411,18 @@ else
     result = false;
 
    
- // here is the segfault @@@ 
- if( all_parties[qi].seats_assigned > all_parties[qi].seats_initial && all_parties[qi].most_over_represented)
-       {
- 
-       result = true;
+ // check each party for underrepresentation 
+     
+  if( all_parties[next_index].seats_assigned > all_parties[next_index].seats_initial && all_parties[next_index].most_over_represented)
+    {
+  
+    result = true;
 
-       all_parties[next_index].seats_assigned++;
-       total_seats_assigned++;  
+    all_parties[next_index].seats_assigned++;
+    total_seats_assigned++;  
 
-       }
+    }
+  
   }  
 
 return result;
