@@ -77,45 +77,50 @@ int main(int argc, char *argv[])
 {
 
 // Declare and initialize variables 
-string FILE_in;  // input file path taken as command-line argument
-string FILE_out; // output specified by user at runtime
-string prompt;
+string FILE_in;   // input file path taken as command-line argument
+string FILE_out;  // output path (derived from above)
+string FILE_qout; // output path for the list of quotients
 
 ifstream datin;
 ofstream datout;
 
 int Seats_total_init=0;
-int Seats_assigned_final=0;
 int Seats_max_cutoff;
 
 int total_votes=0;
 int i=0, j=0;
 bool count_NotA;
 
-// for( i = 1; i < argc; i++ )
-//  { FILE_in += argv[i]; }
-// I/O filestream
-// cout << "\n Input file name is read as: " << FILE_in << endl;
-// cout << "\n Enter output FILE name: ";
-// cin >> FILE_out;
-// cout << "\n\n  Should NotA (None of the Above) votes be counted? (enter [y/n]): " << endl ;
-// cin  >> prompt;
-// if ( prompt == "Y" || prompt == "y")
-//   { count_NotA = true; }
-// else if ( prompt == "N" || prompt == "n")
-//   { count_NotA = false; }
-// else
-//   { 
-//   cout << "Input not understood. Exiting." << endl;
-//   exit(1);
-//   }
+if ( argc != 3 )
+  {
+  cout << "\n ERROR: program requires 2 input arguments; the name of the input file and the boolean count_NotA. ";
+  cout << " please supply these command line parameters at runtime.\n";
+  exit(1);
+  }
 
 
-FILE_in = "./raw_results_2011.txt";
-FILE_out= "./test_out.txt";
-count_NotA=false;
+FILE_in  = argv[1];
+FILE_in.append(".in");
+
+count_NotA = atoi(argv[2]);
+FILE_out   = argv[1];
 
 
+if (count_NotA )
+  {
+  FILE_out.append("_NotA_counted");
+  }
+FILE_out.append(".out");
+
+
+// occasional cross-checking.
+// 
+// cout << "\n command line parameters are: " << endl;
+// cout <<  FILE_in    << endl;
+// cout <<  FILE_out   << endl;
+// cout <<  count_NotA << endl;
+// exit(0);
+// 
 
 // --- Populate party list and read in member data from input file:
 
@@ -252,6 +257,27 @@ for (i=Seats_total_init; i<array_size; i++)
     }
   }
 
+ofstream  qout;
+
+FILE_qout   = argv[1];
+FILE_qout.append("_qlist");
+if (count_NotA )
+  {
+  FILE_qout.append("_NotA_counted");
+  }
+FILE_qout.append(".out"); 
+qout.open(FILE_qout.c_str());
+
+for( i=0; i < Seats_max_cutoff; i++ )
+{
+qout << Total_quotient_list[i].jval      << "\t";
+qout << Total_quotient_list[i].value     << "\t";  // generally, # of votes divided by jval (below)
+qout << Total_quotient_list[i].assigned  << "\t";  // has this quotient been attributed to a seat yet?
+qout << Total_quotient_list[i].party_att << endl;  // Three character string denoting party
+}
+qout.close();
+
+
 // ----------- double-check that the quotient list looks right:
 // datout << "\n Checking the quotient list:\n";
 // 
@@ -316,7 +342,7 @@ for(i=0;i<Num_parties;i++)
   datout <<  all_parties[i].votes         << " \t ";
   datout <<  all_parties[i].vote_share    << " \t ";
   datout <<  all_parties[i].seats_assigned   << " \t ";
-  datout <<  (double(all_parties[i].seats_assigned) / double(Seats_assigned_final)) << endl;
+  datout <<  (double(all_parties[i].seats_assigned) / double(total_seats_assigned)) << endl;
   }
 
 // CLEAN UP MEMORY 
@@ -327,7 +353,7 @@ for(i=0;i<Num_parties;i++)
 
 // OUTPUT message to screen and terminate
 cout << "\n ========================================= \n program complete.\n";
-cout << " final number of seats assigned: " << Seats_assigned_final << " , majority threshold=" << double(Seats_assigned_final)/2.0
+cout << " final number of seats assigned: " << total_seats_assigned << " , majority threshold=" << double(total_seats_assigned)/2.0
 << endl;
 
 return 0;
@@ -390,19 +416,23 @@ if ( total_seats_assigned >= Seats_max_cutoff )// If we've reached cutoff, then 
 if ( count_NotA ) // counting "None of the Above" means each party's share  
   { // exit if no party remains under-represented by more than an integer 
 
-  result = true;
-
   underrep_found = false;
-    for(j=0;j<Num_parties;j++)
-      {
-      if ( ((all_parties[j].seats_assigned +1 )/total_seats_assigned) <  (all_parties[j].votes /total_votes) )
+    for(j=0;j<(Num_parties-1);j++)
+      { //                ^ -1 because we don't care if party "Other" is underrepresented 
+
+      if ( seats_overrepresented (all_parties[j].seats_assigned, total_seats_assigned, all_parties[j].votes, total_votes ) < -1  )
          { // in this case, under-representation of a party exceeds a full integer 
            // (meaning this party has the right to claim another full seat)  
            // therefore,  do not terminate seat allocation process yet. 
-         result = false;
+         underrep_found = true;
          break; 
          }
       } 
+
+  if ( underrep_found )
+     { result = false; }
+  else
+     { result = true;  }
   }
 else
   { //not counting NotA: fraction of votes *among major parties* -> fraction of seats
