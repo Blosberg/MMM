@@ -1,0 +1,10 @@
+col1:  Province 
+col2:  population
+col3:  electors
+col4:  valid ballots
+col5:  % of valid ballots
+col6:  rejected ballots
+col7:  % rejected 
+col8:  Total ballots cast
+col9:  Percentage turnout
+
