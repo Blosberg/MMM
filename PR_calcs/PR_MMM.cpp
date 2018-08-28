@@ -270,7 +270,8 @@ qout.open(FILE_qout.c_str());
 
 for( i=0; i < Seats_max_cutoff; i++ )
 {
-qout << Total_quotient_list[i].jval      << "\t";
+qout << i                                << "\t";  // overall order in hierarchy
+qout << Total_quotient_list[i].jval      << "\t";  // order within individual party rank
 qout << Total_quotient_list[i].value     << "\t";  // generally, # of votes divided by jval (below)
 qout << Total_quotient_list[i].assigned  << "\t";  // has this quotient been attributed to a seat yet?
 qout << Total_quotient_list[i].party_att << endl;  // Three character string denoting party
@@ -314,7 +315,7 @@ for (i=0; i<array_size; i++)
       {
 
       allocated = true;
-      if( Total_quotient_list[i].party_att != "Oth")
+      if( Total_quotient_list[i].party_att != "Oth" && Total_quotient_list[i].party_att != "SPL" )
         { //---- party 'other' doesn't get seats, obviously.
         all_parties[j].seats_assigned++;
         total_seats_assigned++;  
