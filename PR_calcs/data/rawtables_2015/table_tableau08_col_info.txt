@@ -1,0 +1,14 @@
+col 1  : Political affiliation/Appartenance politique
+col 2  : N.L. Valid Votes/Votes valides T.-N.-L.
+col 3  : P.E.I. Valid Votes/Votes valides Î.-P.-É.
+col 4  : N.S. Valid Votes/Votes valides N.-É.
+col 5  : N.B. Valid Votes/Votes valides N.-B.
+col 6  : Que. Valid Votes/Votes valides Qc
+col 7  : Ont. Valid Votes/Votes valides Ont.
+col 8  : Man. Valid Votes/Votes valides Man.
+col 9  : Sask. Valid Votes/Votes valides Sask.
+col 10 : Alta. Valid Votes/Votes valides Alb.
+col 11 : B.C. Valid Votes/Votes valides C.-B.
+col 12 : Y.T. Valid Votes/Votes valides Yn
+col 13 : N.W.T. Valid Votes/Votes valides T.N.-O.
+col 14 : Nun. Valid Votes/Votes valides Nt
