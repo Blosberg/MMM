@@ -108,7 +108,7 @@ FILE_out   = argv[1];
 
 if (count_NotA )
   {
-  FILE_out.append("_NotA_counted");
+  FILE_out.append("_Nc");
   }
 FILE_out.append(".out");
 
@@ -124,7 +124,7 @@ FILE_out.append(".out");
 
 // --- Populate party list and read in member data from input file:
 
-int Num_parties=6;    // "Other" is treated as a party (although awarded no seats)
+int Num_parties=7;    // "Other" and "SPL" are treated as parties (but awarded no seats)
 party all_parties[Num_parties];
 
 datin.open(FILE_in.c_str());
@@ -263,7 +263,7 @@ FILE_qout   = argv[1];
 FILE_qout.append("_qlist");
 if (count_NotA )
   {
-  FILE_qout.append("_NotA_counted");
+  FILE_qout.append("_Nc");
   }
 FILE_qout.append(".out"); 
 qout.open(FILE_qout.c_str());
@@ -417,17 +417,19 @@ if ( count_NotA ) // counting "None of the Above" means each party's share
   { // exit if no party remains under-represented by more than an integer 
 
   underrep_found = false;
-    for(j=0;j<(Num_parties-1);j++)
-      { //                ^ -1 because we don't care if party "Other" is underrepresented 
-
-      if ( seats_overrepresented (all_parties[j].seats_assigned, total_seats_assigned, all_parties[j].votes, total_votes ) < -1  )
-         { // in this case, under-representation of a party exceeds a full integer 
-           // (meaning this party has the right to claim another full seat)  
-           // therefore,  do not terminate seat allocation process yet. 
-         underrep_found = true;
-         break; 
-         }
-      } 
+    for(j=0;j<(Num_parties);j++)
+      { 
+      if( all_parties[j].name != "Oth" &&  all_parties[j].name != "SPL" )
+        { // only check for underrepresentation among "real" parties, not "Oth" or "SPL"
+        if ( seats_overrepresented (all_parties[j].seats_assigned, total_seats_assigned, all_parties[j].votes, total_votes ) < -1  )
+           { // in this case, under-representation of a party exceeds a full integer 
+             // (meaning this party has the right to claim another full seat)  
+             // therefore,  do not terminate seat allocation process yet. 
+           underrep_found = true;
+           break; 
+           }
+        } 
+      }
 
   if ( underrep_found )
      { result = false; }
