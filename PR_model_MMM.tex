@@ -83,7 +83,7 @@
 \thispagestyle{fancy} % Enabling the custom headers/footers for the first page 
 
 \section*{Summary}
-The `Minimal Mixed Member' (MMM) model is put forward, here, as a proposal for electoral reform in the Canadian electoral system because it satisfies the following constraints:
+The `Minimal Mixed Member' (MMM) model is put forward, here, as a proposal for electoral reform in the Canadian electoral system; it is designed to satisfy the following constraints:
 
 \begin{itemize}
 \item Accountability: A personal connection must be preserved between all citizens and a specific MP who represents them.  
@@ -315,7 +315,7 @@ Likewise, from the perspective of candidates, this two-bit communication, sends 
 Under this system, the total number of MPs would not be constant in Parliament, but the addition of supplementary MPs never exceed the share that is already being practiced in a functioning democracy. That is to say, for a parliament with $N$ constituencies, the number of supplementary MPs can range from 0 (in which case the result would be exactly identical to our current FPP system), up to a maximum of $N$ (which would reproduce the German system), but in practice is likely to be approximately $N/3$, as shown in the following section.
 
 \subsection{Outlier votes}
-One last issue with MMM requires discussion regarding the basis of popular vote-shares. To illustrate this, consider a minimal example election with 100 total ballots. Suppose 45 votes were cast for party $X,$ who nevertheless remained under-represented against parties $Y$ and $Z$. 5 votes were cast for various small parties ($\alpha,\beta,\ldots$), each of which individually fell below the 5\% threshold required for supplementary seats, and another 5 ballots were spoiled. 
+One last issue with MMM requires discussion; regarding the basis of popular vote-shares. To illustrate this, consider a minimal example election with 100 total ballots. Suppose 45 votes were cast for party $X,$ who nevertheless remained under-represented against parties $Y$ and $Z$. 5 votes were cast for various small parties ($\alpha,\beta,\ldots$), each of which individually fell below the 5\% threshold required for supplementary seats, and another 5 ballots were spoiled. 
 Is the `proportional' share of seats for party $X$ in this case 50\% (since it obtained half the valid votes for major parties), or 47\% (its share of valid votes), or 45\% (its share of the voting electorate)?\footnote{ In the German system, this question is moot, since the parliament has a fixed size}.
 
 While supporters of minor parties $\alpha,\beta$ have been shut out of supplementary seats to prevent splintering, it would seem unfair to use their corresponding share of popular vote as a redress to compensate party $X$ (whom they voted against). Moreover, there may be voters who support \emph{only} a local candidate, and don't wish to support any national party at all; such a votes would be inclined to only fill out their first ballot, and spoil their second ballot (which, if counted, would serve to inhibit the addition of \emph{any} supplementary MPs, improving the relative influence of their local candidate).
@@ -417,8 +417,8 @@ Department of the Environment, Community and Local Government, Ireland
 \clearpage
 \section{Appendix}
 
-When engineering a proportional adjustment to an existing set of constituent representatives, part of the difficulty stems from the fact that there is no fair or practical way of \emph{removing} representatives from parties that are over-represented. 
-However, this need not necessarily interfere with proportionality. As stated above, the method used in this text is based around the D'Hondt highest averages method; we briefly review that now. 
+The major difficulty in creating proportionality in an elected body that already contains constituent representatives is that there is no fair or practical way of \emph{removing} representatives from parties that are over-represented. 
+This is not insurmountable, however. As stated above, the method used in this text is based around the D'Hondt highest averages method; we briefly review that now. 
 
 For a parliament of size $N$ total seats, quotients $Q_{m,s}$ for each party $m$ are defined as 
 
@@ -426,7 +426,8 @@ For a parliament of size $N$ total seats, quotients $Q_{m,s}$ for each party $m$
 \label{eq:Dhondt}
 Q_{m,s} = \frac{V_m}{s +1},
 \end{equation}
-where $V_m$ is the number of votes won by party $m$  (out of a total of $\bar{V}$ second ballots), and $s$ is an index. In this method, $s$ is typically expanded from zero up to the number of seats in the house; each party obtains a list of such quotients, and the largest $N$ quotients are awarded seats. This method ensures that all parties obtain representation in proportion to their share of the popular vote. 
+where $V_m$ is the number of votes won by party $m$  (out of a total of $\bar{V}$ second ballots), and $s$ is an index extended arbitrarily high. 
+Each party obtains a list of such quotients, and the largest $N$ quotients are awarded seats. This method ensures that all parties obtain representation in proportion to their share of the popular vote. 
 The difference between the usual D'Hondt method and the method employed here is that $N$ is not fixed. The value of $N$ is chosen to just accommodate all existing constituent representatives.
 
 Let $C_m$ represent the number of direct constituent seats that party $m$ was awarded from the total $N^0$,
