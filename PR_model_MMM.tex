@@ -29,6 +29,7 @@
 \usepackage{booktabs} % Horizontal rules in tables
 \usepackage{fix-cm}	 % Custom font sizes - used for the initial letter in the document
 \usepackage{hyperref}
+\usepackage[format=hang]{caption}
 
 %====== added by BO 08.07.2016 ======================== 
 \usepackage{tcolorbox}
@@ -108,15 +109,15 @@ Using data from the previous election, approximate projections as to the result 
 
 
 \begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/2011_plus_MMM.png}
-  \caption{Projected seat distribution following the 2011 federal election, using actual results in bold (left) alongside projected results of this model from the same electorate in transparency (right). The bar defining majority control is also increased to the dashed line for the larger MMM parliament.
+  \includegraphics[width=0.50\textwidth,clip]{Figs/2011_seat_projection}
+  \caption{Projected seat distribution following the 2011 federal election, using actual results (left) alongside projected results of this model from the same electorate in transparency (right). The bar defining majority control is shown in grey transparency for both cases, while a finer black line for each party shows the number of seats that would correspond to their share of the popular vote.
 }
 \label{fig:hypo_2011_sum}
 \end{figure}
 
 
 \begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/Osberg_PR_2015}
+  \includegraphics[width=0.50\textwidth,clip]{Figs/2015_seat_projection}
   \caption{The same plot as in Fig.~\ref{fig:hypo_2011_sum}, using data from the 2015 election.}
 \label{fig:hypo_2015_sum}
 \end{figure}
@@ -137,9 +138,10 @@ Using data from the previous election, approximate projections as to the result 
 , and myriad other signals have indicated that Canada's current first-past-the-post (FPP) voting system needs to be changed. 
 Accordingly, in the most recent national election campaign, all opposition parties pledged to review the electoral process. 
 Although there is clearly a desire for improvement in the way votes are tallied, however, it remains very much unclear as to \emph{how} precisely the system ought to be changed. \\
-\, The focus of this paper is to address this problem at a technical level. After briefly reviewing some example voter models from other nations, a specific model (dubbed the `Minimal Mixed-Member', ) is put forward for consideration, having addressed the most common concerns (enumerated here).\\
-This model was initially inspired by the mixed-member proportional representation system currently used in Germany, however, by truncating the usual D'Hondt method the number of additional MPs brought into parliament to reach proportionality is minimized (hence, the name).
-This method under-representation of parties, while preserving incentive for parties to win local races; it preserves the individual relationship between every voter and an MP; it avoids unnecessary `dilution' of constituency representatives; and it and makes it possible to distinguish between voters' support for local candidates  and national parties. A key feature of this model is that it is conservative in the sense that it modifies our existing system with the minimal set of changes necessary to resolve the most common criticisms of the current system, without introducing unnecessary changes; it fixes only what is broken, and nothing more.
+\, The focus of this paper is to address this problem at a technical level. After briefly reviewing some example voter models from other nations, a specific model (dubbed the `minimal mixed-member', (MMM) ) is put forward for consideration, having addressed the most common concerns (enumerated here).\\
+This model was initially inspired by the mixed-member proportional representation system currently used in Germany. However, by truncating the usual D'Hondt method, the number of additional MPs brought into parliament to reach proportionality is minimized (hence, the name).
+This method eliminates under-representation of parties, while preserving incentive for parties to win local races; it preserves the individual relationship between every voter and an MP; it avoids unnecessary `dilution' of constituency representatives; and it enables voters to distinguish between support for local candidates and national parties. 
+The key features of this model are conservatism and optimality \--that is to say, it modifies our existing system with the minimal set of changes necessary to resolve the most common criticisms of the current system, without introducing unnecessary changes. In short: it fixes only what is broken, and nothing more.
 \end{abstract}
 
 
@@ -149,7 +151,7 @@ This method under-representation of parties, while preserving incentive for part
 \section{Background and Motivation}
 \label{sec:BM} 
 
-Assessing the performance of any electoral system requires first clarifying what it is intended to count, and this question is more subtle than it first appears. 
+Assessing the performance of any electoral system requires first clarifying what it is intended to count; this question is more subtle than it first appears. 
 Referenda, for example, generally put a direct question to voters, and a comparison between the ballots for `yes' and `no', at least in principle, establish popular will unambiguously. 
 In a general election, however, there are various overlapping preferences that are impossible to disentangle with only a single ballot mark.
 Since Canada's FPP system allows voters direct influence only at the riding level, it would seem that the question being posed to voters is as follows:
@@ -168,18 +170,17 @@ Advances in telecommunications, for example, have since made national politics m
 
 Moreover, voter intentions are now influenced by the ready availability of sophisticated statistical pre-election polling. This has increased the importance of `strategic' coordination  between voters' \--in both a formal\cite{Leadnow_environics} and informal sense\footnote{A `strategic  consideration' is defined here as one based on the anticipation of other voters' behaviour}. 
 
-% Thus, it is far from clear that \textbf{(Q1)} captures the voting public's perception of their ballot at election time, and the single `$x$' mark that voters are permitted to make supplies only one bit of information. If we are not even precisely sure of what question is being asked, how can we make sense of the answer?
-
 The distinction between the `ideal' and the `satisfactory' choice is particularly hard to quantify, and often contentious.
-Whether or not voters \emph{should} `vote with their hearts' within the current system is a value judgment that will not be addressed here. It should be noted, however, that many strategic voters from the last election were told that 2015 would be the last election under the current system;  their willingness to continue voting strategically is unclear.
+Whether or not voters \emph{should} `vote with their hearts' within the current system is a value judgment that will not be addressed here. 
+%The simple fact is that many voters \emph{do} feel pressured to vote strategically.
+
 
 More importantly, under the current system citizens of nearly every political persuasion have at some point felt underrepresented \--albeit at different times. It is unlikely that the `joy' of being \emph{over-}represented in certain periods offsets the frustration of under-representation later, and
  national unity can hardly be aided by such stark divisions, even if a kind of \emph{ de facto} proportionality is established on long-term averages. 
 Perhaps what can be said at the moment is that various political parties have now had `their turn' to take advantage of the undemocratic peculiarities of our current system and that the time is now ripe to end these disparities and make our system democratic at all times. 
 
 The benefits of such changes can be seen in existing research that `clearly identifies' higher voter turnout rates in voting systems with some form of proportional representation (PR) \cite{Blais}
- across many nations. In a particularly relevant case study, New Zealand was found to have succeeded in `fostering more positive attitudes about the efficacy of voting' as well as an increase in overall turnout during its transition from FPP to PR\cite{NZ_PR_results}
- .
+ across many nations. In a particularly relevant case study, New Zealand was found to have succeeded in `fostering more positive attitudes about the efficacy of voting' as well as an increase in overall turnout during its transition from FPP to PR\cite{NZ_PR_results}.
 
 There are some risks, however. Germany demonstrated that some systems of PR can have unintended consequences when it was inconveniently revealed that their PR system allowed \emph{negative} vote weights in some circumstances\cite{Die_Zeit_negative_vote} 
 \footnote
@@ -190,8 +191,8 @@ This problem arises because of the fixed number of seats in the parliament, and 
 }.
 This pathological case led to the system being ruled unconstitutional by the courts and the embarrassing technical oversight was removed from the formula. 
 Clearly, avoiding such issues in a Canadian system is paramount, however it also serves to highlight a potential peril.
-Voting systems are complex, involving millions of participants, and the current system, while imperfect, has worked at least well enough to maintain a peaceful democracy for over a century. The greater tinkering that is done to the electoral system, the greater the chances of unintended consequences. 
-Indeed, while a recent report\cite{Broadbent_poll} showed overwhelming support for at least some change to the political system, about half of respondents were wary of \emph{too much} change \--evidently preferring a system that has been tried and tested. As such, keeping change to minimum while resolving specific problems in our existing system will be a principle theme in the following sections.
+Voting systems are complex, involving millions of participants, and the current system, while imperfect, has worked at least well enough to maintain a peaceful democracy for over a century. The more tinkering that is done to such a fundamental part of society, the greater the chances of unintended consequences. 
+Indeed, while a recent report\cite{Broadbent_poll} showed overwhelming support for at least some change to the political system, about half of respondents were wary of \emph{too much} change \--evidently preferring a system that has been tried and tested. For these reasons, keeping change to minimum while resolving specific problems in our existing system will be a principle theme in the following sections.
 
 
 %------------------------------------------------------------------------------------------------
@@ -199,19 +200,17 @@ Indeed, while a recent report\cite{Broadbent_poll} showed overwhelming support f
 %------------------------------------------------------------------------------------------------
 \label{sec:goal_list}
 
-Here, a coarse list of essential and desirable characteristics in an electoral system are enumerated to serve as guiding principles of the model that will be proposed in Sec.~\ref{sec:model_proposal}.  
+Here, a coarse list of essential characteristics in an electoral system are enumerated to serve as guiding principles of the model that will be proposed in Sec.~\ref{sec:model_proposal}.  
 \begin{enumerate}
-\item \textbf{A personal connection} must be maintained between all citizens and an MP whose role is to represent \emph{them} specifically.   
+\item \textbf{Accountability} must be maintained between all citizens and an MP whose role is to represent \emph{them} specifically. Without this, governments become impersonal and estranged.
 \item \textbf{Every vote must count} productively. Scenarios in which citizens are discouraged from voting by thinking that their vote will not matter (or, much worse, that it might actively work against their interests) must be eliminated.
-\item \textbf{Proportionality} of national support for major groups \--either political parties, or national leaders\-- must be at least approximated within some objective threshold\footnote{
-An \emph{exact} mirror of popular support would generally require as many MPs as voters, which is clearly impractical. Rounding, at a minimum, will be necessary.
-}. 
+\item \textbf{Proportionality} of national support for major groups \--either political parties, or national leaders\-- must be reasonably approximated.\footnote{
+An \emph{exact} mirror of popular support would generally require as many MPs as voters, which is clearly impractical. Rounding, at a minimum, is necessary.
+}
 \item   \textbf{Simplicity.} The ballot must be sufficiently easy to understand to avoid any widespread difficulty in filling it out. 
 
 \item  \textbf{A clear mandate} should indicate to each MP whether they were elected on their individual merits, or via public support for their party.
-\\
-and, lastly, 
-\item \textbf{Conservatism.} While imperfect, our current democratic system has many advantages; we should change our existing system only as much as is necessary to achieve the above goals, and no more. Changes that \emph{are} proposed to our existing system should have some evidence of success in an existing democracy.
+\item \textbf{Conservatism.} While imperfect, our current democratic system has many advantages (and already fulfils items 1 and 4 above). We should change our existing system only as much as is necessary to satisfy the remaining objectives, and no more. Changes that \emph{are} proposed to our existing system should have some evidence of success in an existing democracy.
 \end{enumerate}
 
 %----------------------------------------------------------------------------------------
@@ -221,7 +220,7 @@ and, lastly,
 \section{Alternative Models}
 \label{sec:alt_models}
 
-With the list established in Sec.~\ref{sec:goal_list}, we can consider some of the current electoral systems elsewhere in the world and how well they meet our criteria. For example, the \emph{list system}, as used in Israel, produces party representation in proportion to the popular vote; it is easily understood, and it ensures that every vote counts \---all points in its favor. 
+With the list in Sec.~\ref{sec:goal_list}, we can consider some of the current electoral systems elsewhere in the world and how well they meet our criteria. For example, the \emph{list system}, as used in Israel, produces party representation in proportion to the popular vote; it is easily understood, and it ensures that every vote counts \---all points in its favor. 
 The ranking of the party lists, however, is generally determined within the party, leaving candidates no signal as to their individual popularity in any particular riding. Moreover, without separate electoral districts, the connection of voters to a specific MP is eliminated, leading to criticism from such scholars as Enid Lakeman\cite{Lakeman}
 .
 
@@ -229,20 +228,21 @@ The single transferable vote (STV) \---as used in Ireland, for example\cite{Iris
 \--- represents something of a compromise between the Israeli and Canadian systems. In Ireland, multi-seat constituencies allow voters to  rank their preferences and if a voter's first choice fails to be elected (or receives such support that additional votes would be superfluous), their vote is transferred to the voter's second preference, and so on. In constituencies with only one seat, this is equivalent to a ranked ballot (and consistent with requirement (1) above). 
 Although the Irish balloting process involves some increased complexity in the \emph{counting} process, from each voter's perspective, the concept of ranked preference is easily understood and can be made without the need for strategizing.
 
-Note, however, that this is \emph{not} a form of PR; the STV allows for scenarios in which a single party may receive widespread support across the country, and yet still insufficient support in any specific riding to be awarded any seats. Rather, ranked ballots explicitly incorporate a voters willingness to compromise into their ballot, and maximizes the number of voters who get a representative that they `can live with'.
+Note, however, that this is \emph{not} a form of PR. The STV, like FPP, allows for scenarios in which a single party receives widespread support across the country, and yet still insufficient support in any specific riding to be awarded any seats. 
+Rather, STV explicitly incorporates voters' willingness to compromise into their ballot, and maximizes the number of voters who get a representative that they `can live with'.
 Altering our voting system in this way would be akin to supplementing question \textbf{(Q1)} from Sec.~\ref{sec:BM} above with the following: 
 
 \begin{tcolorbox}[colback=white!5!white,colframe=blue!55!black]
 `\ldots and if your ideal candidate cannot be elected, who \emph{then} would you choose?'. 
 \end{tcolorbox}
 
-Part of the appeal of this simple adaptation would be the minimal alteration that would be required to the existing system \--it is merely a matter of gathering additional information from the voters for possible contingencies.
+Part of the appeal of this simple adaptation would be the minimal alteration that would be required to the existing system \--it is merely a matter of gathering additional information from the voters for possible contingencies, and no structural changes to parliamentary makeup are required. Candidates can also review their tally of first-choice votes and contingency votes to ascertain the enthusiasm of their supporters, and the degree of overlap with other parties. 
 
 One further note about the STV/ranked ballot deserves mention: It has been argued\cite{Record}
  that the STV would benefit the currently-governing Liberal party since  `centrist' parties are more likely to accumulate second-place votes than parties on either end of the political spectrum. 
 Whether such an advantage would be `fair' or `unfair' (i.e. should we consider only voters' `pure' beliefs, or perhaps also their willingness to compromise?) is, again, a value judgment that will not be addressed here. Rather, we will focus on the technical question of whether such an advantage actually exists at all.
 
-While it is impossible to know exactly how many voters are currently voting `with their hearts', it may well be the case that voters who are currently voting `strategically' for centrist candidates will be more likely to risk voting for an underdog if they know that they have an `insurance policy' to fall back on. 
+While it is impossible to know exactly how many voters are currently voting `with their hearts', it may well be the case that voters who are currently voting strategically for centrist candidates will be more likely to risk voting for an underdog if they know that they have an `insurance policy' to fall back on. 
 A sufficient shift in first-choice ballots from these risk-averse voters may actually result in surprise upsets with currently `centrist' seats being won by other parties who were superficially thought to have no chance of winning. Given the way ranked ballots are assigned by priority, it remains very much unclear which political party will benefit most from such a system. 
 
 This latter consideration, however, underscores a unique problem of the STV:  there is no obvious mechanism for filtering out small parties to prevent parliament from becoming fragmented. As such, STV could lead to the proliferation of many small parties
@@ -251,16 +251,15 @@ Moreover, the STV system also falls short of our criteria in two important ways.
 First of all: not all votes will `count' in this system. Suppose a voter lives in a riding where a single candidate (regardless of how the voter feels about this candidate) has such overwhelming support as to virtually guarantee victory; or suppose the voter only feels comfortable giving their support to one or two candidates, none of whom have a chance of winning. In either of these cases, the rationale to stay home and not bother voting is similar to our current system. 
 Secondly, this system still will not ensure proportionality: It is entirely possible that parties with significant support dispersed across the country will fail to gather sufficient high-priority votes in any specific riding and will still gain few seats overall.  
 We are then left with the same problem of disparity between the cumulative national popular vote, and parliamentary representation.
-Thus, the STV falls short of requirement (3) in a way that is not easily resolved. 
 
-Nevertheless, criticism of the STV/ranked ballot should not be overstated here; overall, such a model meets most of our requirements and provides a significant set of improvements to our existing system that merit serious consideration. In the following section, however, we will explore another model that satisfies our requirements even more thoroughly.
+Nevertheless, criticism of the STV/ranked ballot should not be overstated here; overall, such a model meets most of our requirements and provides a significant set of improvements to our existing system, and it merits serious consideration. In the following section, however, we will explore another model that satisfies our requirements even more thoroughly.
 
 
 % --------  German MM ----------------
 \subsection{The German Model: A Case Study}
 \label{sec:german_model}
 
-Perhaps the electoral system currently in practice in the world that comes closest to satisfying our requirements is found in Germany.
+Perhaps the electoral system currently in practice that comes closest to satisfying our requirements is the mixed-member model, as used, for example, in Germany, among other countries.
 
 Today German citizens are presented with two votes: the first ballot selects a representative for their constituency, and these representatives fill up half of the Bundestag. The second ballot is used to establish proportionality of the parties using candidates from a party list established prior to the vote
 (for clarity, we will refer to the former as `constituent' MPs  and the latter as `supplementary' MPs).
@@ -297,9 +296,17 @@ A standard algorithm for allocating supplementary seats is the D'Hondt method, f
 
 Supplementary MPs can then be placed in order by this criterion, and party $X$ will be the first in line to receive additional seats. As parliament grows, however, it is likely that at some point, party $Y$ will begin to receive seats as well, since its relative share of parliament is decreasing. Likewise, there will generally be a point at which party $Z$ will also begin to receive supplementary MPs, before, as in the German model, the second half of the legislature is filled. 
 
-Towards the end of this process, seats are assigned to parties $X$, $Y$, \emph{and} $Z$ in an uneven rotation, with each addition conter-acting the effects of the previous. By this point, however, the original purpose of supplementary seats (i.e. to eliminate lob-sided representation) has been satisfied, so why must those seats be filled at all?
-
+Towards the end of this process, seats are assigned to parties $X$, $Y$, \emph{and} $Z$ in an uneven rotation, with each addition counteracting the effects of the previous. By this point, however, the original need for supplementary seats has been satisfied, however. 
 In the MMM, supplementary seats are added only until proportionality is established; thereafter, seats which are neither necessary for proportionality, nor for constituency representation, are simply left empty. {\color{red} figure ***  illustrates this point graphically}
+
+\begin{figure}[h!]
+  \includegraphics[width=0.50\textwidth,clip]{Figs/2015_quotients_figure_composite}
+  \captionsetup{format=default}
+  \caption{ A party's votes can be translated into a set of quotients, plotted here on the vertical axis. A proportional legislature can be defined by drawing a horizontal line on this graph separating quotients that are awarded seats (above) from ones that are discarded (below). Constituency seats are given proriority (to the left), and quotients are then ranked by magnitude. The lowest-quotient constituency seat then defines a threshold, and any quotient corresponding to a supplementary seat (to the right of the `jump' in the data) must exceed this threshold to be included. Further details are given in the appendix.}
+\label{fig:ordered quotients}
+\end{figure}
+
+
 
 For unlikely pathological cases with \emph{extreme} disparities between popular support and representation, the same ratio as used in the German case can be used as an upper limit, to ensure that there can never be \emph{more} supplementary MPs than constituency MPs. In practice, however, the number of supplementary MPs will generally be much less than that.
 
@@ -338,8 +345,8 @@ Let us further assume that all voters' second ballot vote would go to the party 
 
 We can presume that these assumptions correspond well with citizens who are currently `voting with their hearts' without strategic considerations (polls suggest that this corresponds to approximately 2/3 of Canadians), and at least some of the remainder. Under these assumptions, Fig.~\ref{fig:hypo_2011} shows the breakdown of seats that was actually observed in 2011 alongside the total seat count that would be allotted to each party in the MMM system.
 \begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/Osberg_PR_2011}
-  \caption{ Seat distribution following the 2011 federal election for the major national parties. The solid and transparent bars correspond to the actual seat counts from the FPP system, and the hypothetical MMM projections respectively. The threshold for a majority government (solid bar) is shifted upwards to the dashed line as the total number of seats grows. 
+  \includegraphics[width=0.50\textwidth,clip]{Figs/2011_seat_projection}
+  \caption{ Projected seat distribution following the 2011 federal election, using actual results (left) alongside projected results of this model from the same electorate in transparency (right). The bar defining majority control is shown in grey transparency for both cases, while a finer black line for each party shows the number of seats that would correspond to their share of the popular vote.
 }
 \label{fig:hypo_2011}
 \end{figure}
@@ -347,7 +354,7 @@ We can presume that these assumptions correspond well with citizens who are curr
 Likewise, Fig.~\ref{fig:hypo_2015} shows the same calculation for the 2015 election.
 
 \begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/Osberg_PR_2015}
+  \includegraphics[width=0.50\textwidth,clip]{Figs/2015_seat_projection}
   \caption{ Seat distribution following the 2015 federal election, using the same conventions as in Fig.~\ref{fig:hypo_2011}.}
 \label{fig:hypo_2015}
 \end{figure}
@@ -578,17 +585,17 @@ In most realistic scenarios, the decision to keep the quota constant, rather tha
 
 In the two examples provided in the text (from the 2011 and 2015 national elections) the most that any political party remained under-represented after this procedure was a 4\% difference between popular vote share and seat distribution using this formula \---down from about 10\% prior to this adjustment. 
 
-\begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/PR_Droop_2011_output}
-  \caption{ Seat projection following the 2011 federal election, using the `compromise' algorithm from Eq.~\ref{eq:Droop_def}. Fewer seats are added to the constituent base, and proportionality is approached but not reached exactly.}
-\label{fig:Droop_2011}
-\end{figure}
+%\begin{figure}[h!]
+%  \includegraphics[width=0.50\textwidth,clip]{Figs/PR_Droop_2011_output}
+%  \caption{ Seat projection following the 2011 federal election, using the `compromise' algorithm from Eq.~\ref{eq:Droop_def}. Fewer seats are added to the constituent base, and proportionality is approached but not reached exactly.}
+%\label{fig:Droop_2011}
+%\end{figure}
 
-\begin{figure}[h!]
-  \includegraphics[width=0.50\textwidth,clip]{Figs/PR_Droop_2015_output}
-  \caption{ The same projection as Fig.~\ref{fig:Droop_2011}, using data from the 2015 national election.}
-\label{fig:Droop_2015}
-\end{figure}
+%\begin{figure}[h!]
+%  \includegraphics[width=0.50\textwidth,clip]{Figs/PR_Droop_2015_output}
+%  \caption{ The same projection as Fig.~\ref{fig:Droop_2011}, using data from the 2015 national election.}
+%\label{fig:Droop_2015}
+%\end{figure}
 
 Larger deviations are possible, however, as we saw in the hypothetical extreme case above where party \textbf{$X$} earned 100\% of the popular vote on the second ballot with no direct constituency wins. In this case, $X$ will naturally  be assigned 50\% of the seats.
 
