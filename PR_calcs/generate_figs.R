@@ -297,9 +297,9 @@ names( pcharracy ) <- c("BlQ", "CON", "GRN", "LIB", "NDP" )
 
 i=1
 plot( Quotients_2015[i,c(1,3)],
-      log ="y",
-      pch = pcharracy[ Quotients_2015[i,5]  ],
-      col = reordered_palette[ Quotients_2015[i,5]  ],
+      log  = "y",
+      pch  = pcharracy[ Quotients_2015[i,5]  ],
+      col  = reordered_palette[ Quotients_2015[i,5]  ],
       xlim = c(xmin,xmax),
       ylim = c(ymin,ymax),
       main = "2015 Ordered Quotients",
