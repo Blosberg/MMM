@@ -249,10 +249,10 @@ plot( Quotients_2015[Quotients_2015$party_ass=="BlQ", ][,c(2,3)],
       xlab = "j",
       ylab = expression(paste("Q" ["j"])),
       main = "Quotients 2015",
-      cex.lab=1.8, 
-      cex.axis=1.8, 
-      cex.main=1.8,
-      cex = 1.7
+      cex.lab=2.2, 
+      cex.axis=2.2, 
+      cex.main=2.4,
+      cex = 2.2
 )
 points( Quotients_2015[Quotients_2015$party_ass=="CON", ][,c(2,3)],
         pch=0,
@@ -274,13 +274,21 @@ points( Quotients_2015[Quotients_2015$party_ass=="NDP", ][,c(2,3)],
         col = CNDP,
         cex = 1.7
         )
-legend( 175, ymax,
+legend( 155, ymax,
         col    = c(CBlQ, Ccon, CGrn, CLib, CNDP),
         pch    = c(1, 0, 5, 2, 6),
         legend = c("BlQ", "Con", "Grn", "Lib", "NDP"),
-        cex = 1.7
+        cex = 1.2
 )
 
+ytick    <-c(  1E4,   5E4,   1E5,   5E5,   1E6, 5E6  );
+yticklab <-c("1E4", "5E4", "1E5", "5E5", "1E6", "5E6");
+axis(side=2, at=ytick, labels = yticklab)
+
+Quotients_2015_sorted = sort( Quotients_2015$Qval, decreasing = TRUE)
+cutoff_without_constituency = Quotients_2015_sorted [338]
+
+lines(c(0,300),c(cutoff_without_constituency,cutoff_without_constituency), col = rgb(0,0,0,alpha=0.5), lw = 5 )
 
 
 # --- plot reordered quotients ----
@@ -322,7 +330,7 @@ for ( i in c( 2: dim(Quotients_2015)[1] ) )
 # --- define threshold as the minimum quotient associated with seat already assigned to a constituency
 thresh = min(Quotients_2015[Quotients_2015$const_assigned==1,]$Qval)
 # --- and add a grey transparent line delineating this point.
-lines( c(0,xmax),c(thresh,thresh), col= rgb( 0.4, 0.4, 0.4, alpha=0.3 ), lw=3 )
+lines( c(0,xmax),c(thresh,thresh), col= rgb( 0.4, 0.4, 0.4, alpha=0.3 ), lw=5 )
 legend( 500, ymax,
         col    = c(CBlQ, Ccon, CGrn, CLib, CNDP),
         pch    = c(1, 0, 5, 2, 6),
