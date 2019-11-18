@@ -1,4 +1,7 @@
 #!/usr/local/homebrew/bin/python3
+# Driver script for PMM calculation, given input tsv of constituent seat breakdown.
+# single command-line argument should be path to this tsv file, omitting terminal ".in"
+
 import csv, sys
 # ^ necessary for command-line args.
 import matplotlib.pyplot as plt 
