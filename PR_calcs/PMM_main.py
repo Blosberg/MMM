@@ -4,7 +4,7 @@
 
 import csv, sys
 # ^ necessary for command-line args.
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 plt.style.use("fivethirtyeight")
 
 
@@ -16,8 +16,8 @@ if( len(sys.argv) != 2 ):
 
 # arguments should be: file_in, file_out
 
-pathstr  = "./test/2011"
-# pathstr  = sys.argv[1]
+# pathstr  = "./test/2011"
+pathstr  = sys.argv[1]
 
 FILE_in  = pathstr
 FILE_in +=".in"
@@ -33,6 +33,8 @@ total_votes = 0
 Seats_total_init=0
 
 namelist=[]
+
+# --- read in csv file:
 
 with open(FILE_in) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter='\t')
@@ -61,7 +63,7 @@ for pind in range(Num_parties):
         temp = quotient(  all_parties[pind].name,
                           (j < all_parties[pind].Seats_initial),
                           all_parties[pind].Votes/(j+1),
-                          j 
+                          j
                         )
         all_parties[pind].party_quotient_list.append(temp)
 
@@ -84,11 +86,11 @@ if( (not Total_quotient_list[Seats_total_init-1].assigned) or Total_quotient_lis
 allqs=[]
 fout = open(FILE_qlist_out, "w")
 for sval in range(2*Seats_total_init):
-    print("%d\t%d\t%d\t%d\t%s" % ( sval, 
-                                   Total_quotient_list[sval].jval, 
-                                   Total_quotient_list[sval].value, 
-                                   Total_quotient_list[sval].assigned, 
-                                   Total_quotient_list[sval].party_att 
+    print("%d\t%d\t%f\t%d\t%s" % ( sval,
+                                   Total_quotient_list[sval].jval,
+                                   Total_quotient_list[sval].value,
+                                   Total_quotient_list[sval].assigned,
+                                   Total_quotient_list[sval].party_att
                                    ),
          file=fout
     )
@@ -114,14 +116,14 @@ while( Total_quotient_list[sval].value > Threshold ):
         total_seats_assigned += 1
     #
     sval += 1
- 
+
 # --- output finale results to file
 fout = open(File_standings_out, "w")
-for pind in range(Num_parties): 
-    print("%s\t%d\t%d\t%f\t%d\t%f" %( all_parties[pind].name, 
-                                      all_parties[pind].Seats_initial, 
-                                      all_parties[pind].Votes, 
-                                      all_parties[pind].vote_share, 
+for pind in range(Num_parties):
+    print("%s\t%d\t%d\t%f\t%d\t%f" %( all_parties[pind].name,
+                                      all_parties[pind].Seats_initial,
+                                      all_parties[pind].Votes,
+                                      all_parties[pind].vote_share,
                                       all_parties[pind].seats_assigned,
                                      (all_parties[pind].seats_assigned/ total_seats_assigned)
                                    ),
