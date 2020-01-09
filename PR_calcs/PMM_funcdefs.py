@@ -30,7 +30,10 @@ class party():
       self.Votes          = Votes_in
       self.Seats_initial  = Seats_const
   
-      self.vote_share     = 0;
+      self.vote_share     = -1;
+      # vote_share cannot be calculated without considering the whole list
+      # of parties, so initialize it to an obviously nonsensical value.
+
       self.seats_assigned = Seats_const; 
       # seats currently assigned at a given moment 
 
