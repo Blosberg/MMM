@@ -11,10 +11,9 @@ plt.style.use("fivethirtyeight")
 from PMM_funcdefs import quotient, party
 # ^ self-wrttin lib.
 
-if( len(sys.argv) != 2 ):
-    print("ERROR: expected 1 command-line arguments for path; received %d " %( len(sys.argv)-1) )
+assert (len(sys.argv) == 2 ), "Expected 1 command-line arguments for path"
 
-# arguments should be: file_in, file_out
+# arguments should be: file_in (without ".in" suffix)
 
 # pathstr  = "./test/2011"
 pathstr  = sys.argv[1]
@@ -40,10 +39,11 @@ with open(FILE_in) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter='\t')
     party_ind  = 0
     for row in csv_reader:
-        temp = party()
-        temp.name          = row[0]
-        temp.Seats_initial = int(row[1])
-        temp.Votes         = int(row[2])
+        temp = party(row[0], int(row[2]), int(row[1]))
+        # constructor arguments obviate these assignments
+        # temp.name          = row[0]
+        # temp.Seats_initial = int(row[1])
+        # temp.Votes         = int(row[2])
         all_parties.append(temp)
         #
         Seats_total_init += temp.Seats_initial
@@ -54,6 +54,7 @@ with open(FILE_in) as csv_file:
 Num_parties=len(all_parties)
 # including "spoiled" and "independent"
 
+# Define quotient lists for each party
 for pind in range(Num_parties):
     #
     all_parties[pind].vote_share = all_parties[pind].Votes/total_votes
@@ -70,6 +71,7 @@ for pind in range(Num_parties):
 # the j'th quotient for each party is the party's votes divided by j+1
 # (starting from j=0);
 
+# Combine and sort quotient lists
 Total_quotient_list=[]
 
 for pind in range(Num_parties):
