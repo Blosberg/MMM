@@ -1,13 +1,13 @@
 /*
- AUTHOR : BRENDAN OSBERG: Begun July 2016  
- You are free to copy and redistribute this script, provided you cite and give credit 
+ AUTHOR : BRENDAN OSBERG: Begun July 2016
+ You are free to copy and redistribute this script, provided you cite and give credit
 
  This script makes projections for proportional seating arrangements for the MMM model,
  based on raw FPP input.
 
 */
 
-// Include various dependencies 
+// Include various dependencies
 #include <stdlib.h>
 #include <fstream>
 #include <cmath>
@@ -20,11 +20,11 @@ using namespace std;
 
 // --- Define class object "quotient"  (Q objects described in paper)
 
-class quotient{   
+class quotient{
   public:
   quotient();
   double  value;     // generally, # of votes divided by jval (below)
-  int     jval;      // array of values: 1,2,3,... etc. 
+  int     jval;      // array of values: 1,2,3,... etc.
   bool    assigned;  // has this quotient been attributed to a seat yet?
   string party_att;  // Three character string denoting party
   };
@@ -39,7 +39,7 @@ quotient::quotient()
 //----------------------------------------------
 
 
-// --- Define class object "party" 
+// --- Define class object "party"
 class party{
 
   public:
@@ -48,7 +48,7 @@ class party{
   int votes;
   double vote_share;
   int seats_initial;  // # seats assigned directly from constituencies
-  int seats_assigned; // # seats currently assigned at a given moment 
+  int seats_assigned; // # seats currently assigned at a given moment
                       // within this algorithm.
 
   bool most_over_represented;
@@ -59,7 +59,7 @@ party::party()
   {
   name                  = '\0';
   votes                 = 0;
-  seats_initial         = seats_assigned = 0; 
+  seats_initial         = seats_assigned = 0;
   vote_share            = 0.0;
   most_over_represented = false;
   }
@@ -71,12 +71,12 @@ bool should_terminate ( const  quotient * Total_quotient_list, party * all_parti
 double seats_overrepresented (const int seats_assigned, const int total_seats_assigned, const int votes, const int total_votes );
 
 
-// --- Begin main *******************************************************
+// --- Begin main ******************************************
 
 int main(int argc, char *argv[])
 {
 
-// Declare and initialize variables 
+// Declare and initialize variables
 string FILE_in;   // input file path taken as command-line argument
 string FILE_out;  // output path (derived from above)
 string FILE_qout; // output path for the list of quotients
@@ -114,13 +114,13 @@ FILE_out.append(".out");
 
 
 // occasional cross-checking.
-// 
+//
 // cout << "\n command line parameters are: " << endl;
 // cout <<  FILE_in    << endl;
 // cout <<  FILE_out   << endl;
 // cout <<  count_NotA << endl;
 // exit(0);
-// 
+//
 
 // --- Populate party list and read in member data from input file:
 
@@ -140,8 +140,8 @@ else
   {//----succeeded reading in file
   for(i=0;i<Num_parties;i++)
     {
-    datin >>  all_parties[i].name; 
-    datin >>  all_parties[i].seats_initial;  
+    datin >>  all_parties[i].name;
+    datin >>  all_parties[i].seats_initial;
     datin >>  all_parties[i].votes;
 
     all_parties[i].seats_assigned = 0;
@@ -152,20 +152,20 @@ else
 
   }
 Seats_max_cutoff = 2*Seats_total_init;
- 
-// --- populate each party's list of quotients 
+
+// --- populate each party's list of quotients
 quotient Total_quotient_list[Num_parties*2*Seats_total_init];
 
 for(i=0;i<Num_parties;i++)
   {
-  all_parties[i].vote_share          = double(all_parties[i].votes)/double(total_votes); 
+  all_parties[i].vote_share          = double(all_parties[i].votes)/double(total_votes);
   all_parties[i].party_quotient_list = new double[2*Seats_total_init];
-  
+
   for(j=0;j<2*Seats_total_init;j++)
     {
     all_parties[i].party_quotient_list[j] = double(all_parties[i].votes)/(double(j+1));
 
-    //   location:  -->|_______________________|<--  is just to assign a slot in memory. 
+    //   location:  -->|_______________________|<--  is just to assign a slot in memory.
     Total_quotient_list[i*(2*Seats_total_init)+j].party_att = all_parties[i].name;
     Total_quotient_list[i*(2*Seats_total_init)+j].jval      = j;
     Total_quotient_list[i*(2*Seats_total_init)+j].value     = double(all_parties[i].votes)/(double(j+1));
@@ -183,7 +183,7 @@ for(i=0;i<Num_parties;i++)
     //----- the j'th entry is now the party's votes divided by j+1;
   }
 // each party's quotient list is now sorted individually, and the first "C" seats are
-// "assigned", where C is the # of seats the party already won from Constituency races. 
+// "assigned", where C is the # of seats the party already won from Constituency races.
 // Total_quotient_list is stored as a block by party; below we will sort that (first
 // by "assigned" status, and then by quotient value
 
@@ -198,7 +198,7 @@ for(i=0;i<Num_parties;i++)
   {
   current_rdiff  =  double(all_parties[i].seats_initial)/double(Seats_total_init) - (double(all_parties[i].votes/double(total_votes)) );
 
-  if( current_rdiff > most_OR ) 
+  if( current_rdiff > most_OR )
     {
     most_OR       = current_rdiff;
     most_OR_index = i;
@@ -265,7 +265,7 @@ if (count_NotA )
   {
   FILE_qout.append("_Nc");
   }
-FILE_qout.append(".out"); 
+FILE_qout.append(".out");
 qout.open(FILE_qout.c_str());
 
 for( i=0; i < Seats_max_cutoff; i++ )
@@ -281,32 +281,32 @@ qout.close();
 
 // ----------- double-check that the quotient list looks right:
 // datout << "\n Checking the quotient list:\n";
-// 
+//
 // for (i=0; i<array_size; i++)
 //   {
-//   datout << Total_quotient_list[i].value    << "\t"; 
-//   datout << Total_quotient_list[i].jval     << "\t"; 
-//   datout << Total_quotient_list[i].assigned << "\t"; 
-//   datout << Total_quotient_list[i].party_att << endl; 
-//   } 
+//   datout << Total_quotient_list[i].value    << "\t";
+//   datout << Total_quotient_list[i].jval     << "\t";
+//   datout << Total_quotient_list[i].assigned << "\t";
+//   datout << Total_quotient_list[i].party_att << endl;
+//   }
 // exit(0);
 
 
-// Total_quotient_list IS NOW ORDERED first by "assigned" status, and then by "value" 
-// it has size "array_size". 
+// Total_quotient_list IS NOW ORDERED first by "assigned" status, and then by "value"
+// it has size "array_size".
 // only the first 308 quotients are "assigned"
 
-//  NOW ASSIGN SEATS IN ORDER 
-int total_seats_assigned  = 0; 
+//  NOW ASSIGN SEATS IN ORDER
+int total_seats_assigned  = 0;
 bool allocated;
 
 for (i=0; i<array_size; i++)
   {
 
-  if ( should_terminate( Total_quotient_list, all_parties, i, Seats_total_init, total_seats_assigned, Seats_max_cutoff,  Num_parties, total_votes, count_NotA ) )     
+  if ( should_terminate( Total_quotient_list, all_parties, i, Seats_total_init, total_seats_assigned, Seats_max_cutoff,  Num_parties, total_votes, count_NotA ) )
      {
      break;
-     } 
+     }
   allocated = false;
 
   for(  j=0;j<Num_parties;j++)
@@ -318,9 +318,9 @@ for (i=0; i<array_size; i++)
       if( Total_quotient_list[i].party_att != "Oth" && Total_quotient_list[i].party_att != "SPL" )
         { //---- party 'other' doesn't get seats, obviously.
         all_parties[j].seats_assigned++;
-        total_seats_assigned++;  
+        total_seats_assigned++;
         }//--finished assigning to seat to party (provided it wasn't "Oth")
-      }//--finished "if divisor list name matches"    
+      }//--finished "if divisor list name matches"
     }//--- finished scanning through the parties
 
   if( !allocated )
@@ -334,19 +334,19 @@ for (i=0; i<array_size; i++)
 
 finished_allocation:
 
-// OUTPUT TO FILE 
+// OUTPUT TO FILE
 
 for(i=0;i<Num_parties;i++)
   {
-  datout <<  all_parties[i].name          << " \t "; 
-  datout <<  all_parties[i].seats_initial << " \t ";  
+  datout <<  all_parties[i].name          << " \t ";
+  datout <<  all_parties[i].seats_initial << " \t ";
   datout <<  all_parties[i].votes         << " \t ";
   datout <<  all_parties[i].vote_share    << " \t ";
   datout <<  all_parties[i].seats_assigned   << " \t ";
   datout <<  (double(all_parties[i].seats_assigned) / double(total_seats_assigned)) << endl;
   }
 
-// CLEAN UP MEMORY 
+// CLEAN UP MEMORY
 for(i=0;i<Num_parties;i++)
   {
   delete [] all_parties[i].party_quotient_list;
@@ -372,13 +372,13 @@ bool result = false;
 
 // --- check if we've allocated all Const. seats yet. If not, keep going.
 if ( qi < Seats_total_init )
-  { 
-    return(false); 
+  {
+    return(false);
   }
 
 // --- x-check total number of seats, and get the next candidate party
 bool next_found=false;
-int  next_index=-1; 
+int  next_index=-1;
 for(j=0;j<Num_parties;j++)
   {
   total_seats_xcheck  += all_parties[j].seats_assigned;
@@ -391,14 +391,14 @@ for(j=0;j<Num_parties;j++)
        exit(1);
        }
     next_found = true; // should only happen once
-    next_index = j; 
+    next_index = j;
     }
   }
 
 if (  total_seats_xcheck != total_seats_assigned || !next_found )//sanity check.
   {
   cout << "\n ERROR: in should_terminate function.\n";
-  cout << " inconsistent total seat count, or next allocation not found. \n "; 
+  cout << " inconsistent total seat count, or next allocation not found. \n ";
   cout << " total_seats_xcheck   = " << total_seats_xcheck   << endl;
   cout << " total_seats_assigned = " << total_seats_assigned << endl;
   exit(1);
@@ -409,27 +409,27 @@ if ( total_seats_assigned >= Seats_max_cutoff )// If we've reached cutoff, then 
     cout << "\n Parliament size reached cutoff threshold. Terminating at seat #";
     cout << total_seats_assigned;
     cout << " last seat assigned to the " << all_parties[j].name << " party.\n";
-    return ( true ); 
+    return ( true );
     }
 
-// ------------- 
+// -------------
 
-if ( count_NotA ) // counting "None of the Above" means each party's share  
-  { // exit if no party remains under-represented by more than an integer 
+if ( count_NotA ) // counting "None of the Above" means each party's share
+  { // exit if no party remains under-represented by more than an integer
 
   underrep_found = false;
     for(j=0;j<(Num_parties);j++)
-      { 
+      {
       if( all_parties[j].name != "Oth" &&  all_parties[j].name != "SPL" )
         { // only check for underrepresentation among "real" parties, not "Oth" or "SPL"
         if ( seats_overrepresented (all_parties[j].seats_assigned, total_seats_assigned, all_parties[j].votes, total_votes ) < -1  )
-           { // in this case, under-representation of a party exceeds a full integer 
-             // (meaning this party has the right to claim another full seat)  
-             // therefore,  do not terminate seat allocation process yet. 
+           { // in this case, under-representation of a party exceeds a full integer
+             // (meaning this party has the right to claim another full seat)
+             // therefore,  do not terminate seat allocation process yet.
            underrep_found = true;
-           break; 
+           break;
            }
-        } 
+        }
       }
 
   if ( underrep_found )
@@ -443,20 +443,20 @@ else
 
     result = false;
 
-   
- // check each party for underrepresentation 
-     
+
+ // check each party for underrepresentation
+
   if( all_parties[next_index].seats_assigned > all_parties[next_index].seats_initial && all_parties[next_index].most_over_represented)
     {
-  
+
     result = true;
 
     all_parties[next_index].seats_assigned++;
-    total_seats_assigned++;  
+    total_seats_assigned++;
 
     }
-  
-  }  
+
+  }
 
 return result;
 }
