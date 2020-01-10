@@ -99,14 +99,13 @@ for sval in range(2*Seats_total_init):
     allqs.append(Total_quotient_list[sval].value)
 fout.close()
 
-# --- Define threshold and compute standings:
+# --- Define threshold and initialize index at Seats_total_init:
 
 Threshold = Total_quotient_list[Seats_total_init-1].value
 total_seats_assigned = Seats_total_init
 
-sval = Seats_total_init
-
 # Starting from the first unassigned seat
+sval = Seats_total_init
 
 while( Total_quotient_list[sval].value > Threshold ):
     # scroll through and add seats until the value is below threshold.
