@@ -1,0 +1,108 @@
+import pandas as pd
+
+class quotient():
+    """A class representing a single quotient."""
+    def __init__(self, party_att_in = "NULL", assigned_in = False, value_in = 0, jval_in = 0 ):
+        """Assume a six-sided die."""
+        self.party_att = party_att_in
+        self.assigned  = assigned_in
+        self.value     = value_in
+        self.jval      = jval_in
+
+    def __lt__(self, other):
+        # Being assigned to a constituency takes priority in sorting
+         # thereafter we compare the values
+        if (    self.assigned == False and other.assigned == True ):
+             return True
+        elif (  self.assigned == True and other.assigned == False ):
+             return False
+        else:
+             return self.value < other.value
+
+    def __gt__(self, other):
+        return  other < self
+
+# --- Define class object "party"
+class party():
+  """A class representing a party -- each instance will end up with a
+  whole list of quotients."""
+  def __init__(self, name_in="NULL", Votes_in=0, Seats_const=0, N_total_votes=-1, Seats_total_init=-1):
+
+      self.name           = name_in
+      self.Votes          = Votes_in
+      self.Seats_initial  = Seats_const
+
+      self.vote_share     = Votes_in/N_total_votes
+      # N_total_votes now read in from Elections Canada table
+      # so vote_share can be immediately initialized.
+
+      self.seats_assigned = Seats_const;
+      # seats currently assigned at a given moment
+
+      # temp = quotient("NULL", False, 0)
+      self.party_quotient_list = [ quotient( self.name,
+                                             (j < self.Seats_initial),
+                                             (self.Votes/(j+1)),
+                                             j )
+                                   for j in range(2*Seats_total_init) ]
+
+# Define shorthand abbreviations for parties
+party_abbrev = {
+    'Animal Protection Party of Canada/Le Parti pour la Protection des Animaux du Canada':"APP",
+    'Bloc Québécois/Bloc Québécois':"BLQ",
+    "Canada's Fourth Front/Quatrième front du Canada":"C4F",
+    'Canadian Nationalist Party/Parti Nationaliste Canadien':"CNP",
+    "Christian Heritage Party of Canada/Parti de l'Héritage Chrétien du Canada":"CHP",
+    'Communist Party of Canada/Parti communiste du Canada':"COM",
+    'Conservative Party of Canada/Parti conservateur du Canada':"CON",
+    'Green Party of Canada/Le Parti Vert du Canada':"GRN",
+    'Liberal Party of Canada/Parti libéral du Canada':"LIB",
+    'Libertarian Party of Canada/Parti Libertarien du Canada':"LRT",
+    'Marijuana Party/Parti Marijuana':"MJP",
+    'Marxist-Leninist Party of Canada/Parti Marxiste-Léniniste du Canada':"MLP",
+    'National Citizens Alliance of Canada/Alliance Nationale des Citoyens du Canada':"NCA",
+    'New Democratic Party/Nouveau Parti démocratique':"NDP",
+    "Parti pour l'Indépendance du Québec/Parti pour l'Indépendance du Québec":"PIQ",
+    'Parti Rhinocéros Party/Parti Rhinocéros Party':"RIN",
+    "People's Party of Canada/Parti populaire du Canada":"PPC",
+    'Progressive Canadian Party/Parti Progressiste Canadien':"PCP",
+    'Stop Climate Change/Arrêtons le changement climatique':"SCC",
+    'The United Party of Canada/Parti Uni du Canada':"UPC",
+    'Veterans Coalition Party of Canada/Parti de la coalition des anciens combattants du Canada':"VET"
+}
+
+# --- Extract party seat standings from table
+def get_party_seat_standings(Seats_init):
+    """Obtain Seat assignments from standard table issued by Elections Canada
+    Here, there are multiplie columns for each party, divided by gender,
+    condensed here.
+
+    Also, party names have changed over time, so for old elections this
+    function will need to be revised.  """
+    party_cols = pd.Series( [
+        list( filter(lambda x: "Liberal Party of Canada" in x, Seats_init) ),
+        list( filter(lambda x: "Conservative Party of Canada" in x, Seats_init) ),
+        list( filter(lambda x: "Bloc Québécois" in x, Seats_init) ),
+        list( filter(lambda x: "New Democratic Party" in x, Seats_init) ),
+        list( filter(lambda x: "Green Party of Canada" in x, Seats_init) ),
+        list( filter(lambda x: "Others" in x, Seats_init) ),
+        list( filter(lambda x: "Total_" in x, Seats_init) )],
+     index = ["LIB","CON","BLQ","NDP","GRN","OTH","TOT"]
+    )
+
+    standings = pd.Series( [ sum( Seats_init[party_cols[p]].sum()) for p in range(len(party_cols)) ],
+                                index = party_cols.index )
+
+    #--------- Sanity checks:
+    # Ensure all columns accounted for:
+    assert Seats_init.shape[1] == sum(  [ len(party_cols[p]) for p in range( len(party_cols)) ] ) , "Party name change must be accounted for"
+
+    # Ensure all seats add up to the total:
+    Total_seats = standings["TOT"]
+    standings.drop("TOT", inplace =True)
+    assert sum( standings ) == Total_seats, "Failed to allocate all seats to a party"
+
+    # Add a "Spoil" entry (which will always have seats = 0)
+    standings = pd.concat([ standings, pd.Series([0],index=["SPL"]) ] )
+
+    return standings

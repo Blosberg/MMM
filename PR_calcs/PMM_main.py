@@ -1,111 +1,124 @@
 #!/usr/local/homebrew/bin/python3
-# Driver script for PMM calculation, given input tsv of constituent seat breakdown.
-# single command-line argument should be path to this tsv file, omitting terminal ".in"
+# Driver script for PMM calculation, given folder with tables 3,7, and 8 from Elections Canada
+# single command-line argument should be path to this folder
 
+import os
 import csv, sys
 # ^ necessary for command-line args.
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-plt.style.use("fivethirtyeight")
-
-
-from PMM_funcdefs import quotient, party
-# ^ self-wrttin lib.
+import PMM
+# ^ Library for Parsimonious Mixed-Member functions.
+# Defines various functions and classes
+MAJOR_PARTY_THRESH = 0.05
 
 assert (len(sys.argv) == 2 ), "Expected 1 command-line arguments for path"
 
-# arguments should be: file_in (without ".in" suffix)
-
-# pathstr  = "./test/2011"
+# input argument should be just path to data tables
 pathstr  = sys.argv[1]
 
-FILE_in  = pathstr
-FILE_in +=".in"
 
-FILE_qlist_out   = pathstr
-FILE_qlist_out += "_qlist.out"
+# ------------- info on total # votes cast & turnout. ---------------------
+print ("Collecting info on voter turnout: ...")
+T3_path       = os.path.join(pathstr, "table_tableau03.csv")
+df_Nvotes        = pd.read_csv(T3_path, index_col="Province")
+N_total_votes = df_Nvotes.iloc[:, 6].sum()
+print("Total votes : %d " %(N_total_votes) )
+print( "Percent votes valid  : %.4f " %( 100*df_Nvotes.iloc[:, 2].sum()/N_total_votes) )
+print( "Percent votes invalid: %.4f " %( 100*df_Nvotes.iloc[:, 4].sum()/N_total_votes) )
 
-File_standings_out = pathstr
-File_standings_out += ".out"
+# ------------- Collect info on initial seat distribution -----------------
+T7_path = os.path.join(pathstr, "table_tableau07.csv")
+Seats_init = pd.read_csv(T7_path, index_col="Province")
+Const_Seats = PMM.get_party_seat_standings(Seats_init)
+Seats_total_init = sum( Const_Seats )
 
+# ------------- Valid votes by party: -------------------------------------
+T8_path = os.path.join(pathstr, "table_tableau08.csv")
+VV_bp = pd.read_csv(T8_path, index_col=0) # index is party name:
+
+Pop_vote_share = pd.Series( VV_bp.sum(axis=1)/N_total_votes,
+                            index= VV_bp.index )
+# Filter for parties with >5% pop support
+maj_parties = Pop_vote_share.index[ Pop_vote_share > 0.05 ]
+
+# Collect Vote_counts for maj parties, and account for spoiled and independent
+Vote_counts = VV_bp.loc[maj_parties,].sum(axis=1)
+Vote_counts.index = [ PMM.party_abbrev[key] for key in Vote_counts.index ]
+
+# All other parties are grouped together as "OTHER"
+# i.e. those who are _explicitly_ independent, as well as those whose
+# parties are relegated to "independence" by falling below threshold support.
+Vote_counts["OTH"] = sum ( VV_bp.loc[Pop_vote_share < MAJOR_PARTY_THRESH, ].sum(axis = 1 ) )
+
+# "SPL" captures all rejected (i.e. 'spoiled') ballots
+Vote_counts["SPL"] = df_Nvotes.sum(axis=0)[4]
+
+Standings = pd.DataFrame( {"Votes":Vote_counts, "Seats_init": Const_Seats } )
+
+
+print("initial Party Standings: ")
+print( Standings )
+print("\n----------------------------------")
+
+# OUTPUT this part for documentation:
+Standings.to_csv( os.path.join( pathstr, "party_Standings.tsv" ),
+                  sep="\t" )
+
+# ------------- Now start building party classes: ----------------------------------
 all_parties = []
-total_votes = 0
-Seats_total_init=0
+f_qlist_out     = os.path.join( pathstr, "PMM_qlist.tsv")
+f_standings_out = os.path.join( pathstr, "PMM_standings.tsv")
 
-namelist=[]
 
-# --- read in csv file:
+all_parties = [PMM.party( Standings.index[p],
+                          Standings.iloc[p,0],
+                          Standings.iloc[p,1],
+                          N_total_votes,
+                          Seats_total_init ) for p in range(Standings.shape[0])]
+namelist    = Standings.index
+Num_parties = len(all_parties)
+# includes "spoiled" and "independent"
 
-with open(FILE_in) as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter='\t')
-    party_ind  = 0
-    for row in csv_reader:
-        temp = party(row[0], int(row[2]), int(row[1]))
-        # constructor arguments obviate these assignments
-        # temp.name          = row[0]
-        # temp.Seats_initial = int(row[1])
-        # temp.Votes         = int(row[2])
-        all_parties.append(temp)
-        #
-        Seats_total_init += temp.Seats_initial
-        total_votes      += temp.Votes
-        #
-        namelist.append(temp.name)
-
-Num_parties=len(all_parties)
-# including "spoiled" and "independent"
-
-# Define quotient lists for each party
-for pind in range(Num_parties):
-    #
-    all_parties[pind].vote_share = all_parties[pind].Votes/total_votes
-    #
-    for j in range(2*Seats_total_init):
-        # "jval" represents the ranking of the quotient within each party's list
-        temp = quotient(  all_parties[pind].name,
-                          (j < all_parties[pind].Seats_initial),
-                          all_parties[pind].Votes/(j+1),
-                          j
-                        )
-        all_parties[pind].party_quotient_list.append(temp)
-
-# the j'th quotient for each party is the party's votes divided by j+1
-# (starting from j=0);
-
-# Combine and sort quotient lists
+# ------- Combine and sort quotient lists from each party -----------
 Total_quotient_list=[]
-
 for pind in range(Num_parties):
     Total_quotient_list.extend( all_parties[pind].party_quotient_list )
 
+# and sort, for our globally sorted quotient list
 Total_quotient_list.sort(reverse=True)
 # ^ now we have an ordered list of all quotients from all parties.
 
-# Sanity check:
-if( (not Total_quotient_list[Seats_total_init-1].assigned) or Total_quotient_list[Seats_total_init].assigned):
-    print("ERROR: Total_quotient_list not properly sorted.")
+# Sanity check, all constituency seats are assigned, and no others are:
+assert all([seat.assigned for seat in Total_quotient_list[0:Seats_total_init-1]]) and not any( [seat.assigned for seat in Total_quotient_list[Seats_total_init:]] ), "ERROR: Total_quotient_list not properly sorted, or inconsistent with expected seat number."
 
-# --- Document the quotient list:
-allqs=[]
-fout = open(FILE_qlist_out, "w")
-for sval in range(2*Seats_total_init):
-    print("%d\t%d\t%f\t%d\t%s" % ( sval,
-                                   Total_quotient_list[sval].jval,
-                                   Total_quotient_list[sval].value,
-                                   Total_quotient_list[sval].assigned,
-                                   Total_quotient_list[sval].party_att
-                                   ),
-         file=fout
-    )
-    allqs.append(Total_quotient_list[sval].value)
-fout.close()
+# --- Document the quotient list in a tsv file:
+shortlist = Total_quotient_list[:2*Seats_total_init]
+# (nothing beyond this list has any chance of consideration.
+len( shortlist)
+Qlist = pd.DataFrame({"j"        :[ q.jval   for q in shortlist],
+                      "Value"    :[ q.value  for q in shortlist],
+                      "Assigned" :[ int(q.assigned) for q in shortlist],
+                      "party"    :[ q.party_att     for q in shortlist],
+                      } )
+Qlist.round(2).to_csv(f_qlist_out, sep="\t")
 
-# --- Define threshold and initialize index at Seats_total_init:
-
+# ------------------------------------------------------------------
+# --- Now define Threshold, initialize baseline, and begin to "grow"
+# --- by adding quotients until proportionality is reached
 Threshold = Total_quotient_list[Seats_total_init-1].value
 total_seats_assigned = Seats_total_init
 
 # Starting from the first unassigned seat
 sval = Seats_total_init
+
+
+#=======================================================
+print("---------- MADE IT TO CHECKPOINT 2 -------------")
+sys.exit()
+#=======================================================
+# N.B. Check this exit criteria: want to exit when underrep <1
 
 while( Total_quotient_list[sval].value > Threshold ):
     # scroll through and add seats until the value is below threshold.
@@ -117,6 +130,11 @@ while( Total_quotient_list[sval].value > Threshold ):
         total_seats_assigned += 1
     #
     sval += 1
+
+#=======================================================
+print("---------- MADE IT TO CHECKPOINT 3 -------------")
+sys.exit()
+#=======================================================
 
 # --- output finale results to file
 fout = open(File_standings_out, "w")
