@@ -46,6 +46,7 @@ maj_parties = Pop_vote_share.index[ Pop_vote_share > 0.05 ]
 # Collect Vote_counts for maj parties, and account for spoiled and independent
 Vote_counts = VV_bp.loc[maj_parties,].sum(axis=1)
 Vote_counts.index = [ PMM.party_abbrev[key] for key in Vote_counts.index ]
+maj_parties       = [ PMM.party_abbrev[key] for key in maj_parties ]
 
 # All other parties are grouped together as "OTHER"
 # i.e. those who are _explicitly_ independent, as well as those whose
@@ -63,28 +64,30 @@ print( Standings )
 print("\n----------------------------------")
 
 # OUTPUT this part for documentation:
-Standings.to_csv( os.path.join( pathstr, "party_Standings.tsv" ),
+Standings.to_csv( os.path.join( pathstr, "party_Standings_init.tsv" ),
                   sep="\t" )
 
 # ------------- Now start building party classes: ----------------------------------
-all_parties = []
 f_qlist_out     = os.path.join( pathstr, "PMM_qlist.tsv")
-f_standings_out = os.path.join( pathstr, "PMM_standings.tsv")
+f_standings_out = os.path.join( pathstr, "PMM_standings_final.tsv")
 
 
-all_parties = [PMM.party( Standings.index[p],
-                          Standings.iloc[p,0],
-                          Standings.iloc[p,1],
-                          N_total_votes,
-                          Seats_total_init ) for p in range(Standings.shape[0])]
+all_parties = { Standings.index[p]: PMM.party( Standings.index[p], 
+                                        Standings.iloc[p,0], 
+                                        Standings.iloc[p,1],
+                                        N_total_votes,
+                                        Seats_total_init)
+                for p in range(Standings.shape[0])}
+
 namelist    = Standings.index
 Num_parties = len(all_parties)
 # includes "spoiled" and "independent"
 
 # ------- Combine and sort quotient lists from each party -----------
 Total_quotient_list=[]
-for pind in range(Num_parties):
-    Total_quotient_list.extend( all_parties[pind].party_quotient_list )
+for p in all_parties.keys():
+    Total_quotient_list.extend( all_parties[p].party_quotient_list )
+Total_quotient_list.sort(reverse=True)
 
 # and sort, for our globally sorted quotient list
 Total_quotient_list.sort(reverse=True)
@@ -111,41 +114,37 @@ Threshold = Total_quotient_list[Seats_total_init-1].value
 total_seats_assigned = Seats_total_init
 
 # Starting from the first unassigned seat
-sval = Seats_total_init
-
-
-#=======================================================
-print("---------- MADE IT TO CHECKPOINT 2 -------------")
-sys.exit()
-#=======================================================
-# N.B. Check this exit criteria: want to exit when underrep <1
-
-while( Total_quotient_list[sval].value > Threshold ):
-    # scroll through and add seats until the value is below threshold.
-    if( Total_quotient_list[sval].party_att != "SPL" and Total_quotient_list[sval].party_att != "Oth" ):
-        # if this seat is not independent or "spoiled", then find the party matching its name
-        pind = namelist.index( Total_quotient_list[sval].party_att )
-        # and increment the number of its seats:
-        all_parties[pind].seats_assigned += 1
-        total_seats_assigned += 1
-    #
+sval = Seats_total_init    
+while (sval < 2*Seats_total_init):
     sval += 1
+    current_party = Total_quotient_list[sval].party_att
+    
+    # scroll through and add seats until the value is below threshold.
+    if (current_party == "SPL" or current_party == "OTH" ):
+        continue
+        # Skip OTHER, SPOILED quotients.
+    elif ( (all_parties[current_party].vote_share*total_seats_assigned)-all_parties[current_party].seats_assigned) > 1 :
+        # if this seat is not independent or "spoiled", 
+        # and is owed seats >1 then give it an extra seat:        
+        all_parties[current_party].seats_assigned += 1
+        total_seats_assigned += 1
+    else:
+        pass
+# --- Finished assigning extra seats -----------
+# ------------------------------------------------------------------
 
-#=======================================================
-print("---------- MADE IT TO CHECKPOINT 3 -------------")
-sys.exit()
-#=======================================================
+Standings_final = pd.DataFrame({"Party": list( all_parties.keys() ),
+                      "Seats_initial"  :[ all_parties[p].Seats_initial  for p in all_parties],
+                      "Votes"          :[ all_parties[p].Votes          for p in all_parties ],
+                      "Vote_share"     :[ all_parties[p].vote_share     for p in all_parties],
+                      "Seats_final"    :[ all_parties[p].seats_assigned for p in all_parties ],
+                      "Seat_share"     :[ (all_parties[p].seats_assigned)/total_seats_assigned  for p in all_parties]                                
+                      } )
+#and output to file:
+Standings_final.round(2).to_csv(f_standings_out, sep="\t")
 
-# --- output finale results to file
-fout = open(File_standings_out, "w")
-for pind in range(Num_parties):
-    print("%s\t%d\t%d\t%f\t%d\t%f" %( all_parties[pind].name,
-                                      all_parties[pind].Seats_initial,
-                                      all_parties[pind].Votes,
-                                      all_parties[pind].vote_share,
-                                      all_parties[pind].seats_assigned,
-                                     (all_parties[pind].seats_assigned/ total_seats_assigned)
-                                   ),
-          file=fout)
-fout.close()
+# ==============================================================
+#         CALCULATIONS FINISHED. NOW START PLOTTING
+# ==============================================================
 
+print("\nPMM program complete.")

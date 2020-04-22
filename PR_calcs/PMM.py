@@ -106,3 +106,11 @@ def get_party_seat_standings(Seats_init):
     standings = pd.concat([ standings, pd.Series([0],index=["SPL"]) ] )
 
     return standings
+
+# -------------------------------
+def shouldbe_done( current_seatnum, partylist, maj_parties):
+    """Obtain a boolean characterizing whether all major parties
+    are currently owed less than 1 seat."""
+    return all( [current_seatnum*(partylist[p].vote_share)-partylist[p].seats_assigned < 1 for p in maj_parties] )
+
+
