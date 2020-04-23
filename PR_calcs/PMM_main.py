@@ -3,18 +3,15 @@
 # single command-line argument should be path to this folder
 
 import os, csv, sys
-import str
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import PMM
-# ^ Library for Parsimonious Mixed-Member functions.
-# Defines various functions and classes
 MAJOR_PARTY_THRESH = 0.05
-
 assert (len(sys.argv) == 2 ), "Expected 1 command-line arguments for path"
-
 # ================ import data ===============
+
 # input argument should be just path to data tables
 pathstr  = sys.argv[1]
 year = "".join([x for x in pathstr if str.isdigit(x)])
@@ -25,6 +22,7 @@ assert ( int(year) < 2050 and int(year) > 1867 ), "Inferred implausible year=%d,
 # Define output paths:
 if not os.path.exists( os.path.join( pathstr, "PMM_out") ):
     os.makedirs(os.path.join( pathstr, "PMM_out"))
+f_init_standings_out = os.path.join( pathstr, "PMM_out", "party_Standings_init.tsv" )
 f_qlist_out     = os.path.join( pathstr, "PMM_out", "PMM_qlist.tsv")
 f_standings_out = os.path.join( pathstr, "PMM_out", "PMM_standings.tsv")
 
@@ -37,12 +35,12 @@ T8_path = os.path.join(pathstr, "table_tableau08.csv")
 
 # character encoding changed in 2019:
 if (year < 2019 ):
-    df_Nvotes     = pd.read_csv(T3_path, index_col="Province", encoding = "ISO-8859-1")
-    Seats_init = pd.read_csv(T7_path, index_col="Province", encoding = "ISO-8859-1")
+    df_Nvotes  = pd.read_csv( T3_path, index_col="Province", encoding = "ISO-8859-1")
+    Seats_init = pd.read_csv( T7_path, index_col="Province", encoding = "ISO-8859-1")
     VV_bp      = pd.read_csv( T8_path, index_col=0, encoding = "ISO-8859-1")
 else:
-    df_Nvotes     = pd.read_csv(T3_path, index_col="Province")
-    Seats_init = pd.read_csv(T7_path, index_col="Province")
+    df_Nvotes  = pd.read_csv( T3_path, index_col="Province")
+    Seats_init = pd.read_csv( T7_path, index_col="Province")
     VV_bp      = pd.read_csv( T8_path, index_col=0) # index is party name:
 
 
@@ -85,13 +83,8 @@ print( Standings )
 print("\n----------------------------------")
 
 # OUTPUT this part for documentation:
-Standings.to_csv( os.path.join( pathstr, "party_Standings_init.tsv" ),
-                  sep="\t" )
-
+Standings.to_csv( f_init_standings_out, sep="\t" )
 # ------------- Now start building party classes: ----------------------------------
-f_qlist_out     = os.path.join( pathstr, "PMM_qlist.tsv")
-f_standings_out = os.path.join( pathstr, "PMM_standings_final.tsv")
-
 
 all_parties = { Standings.index[p]: PMM.party( Standings.index[p],
                                         Standings.iloc[p,0],
@@ -100,13 +93,13 @@ all_parties = { Standings.index[p]: PMM.party( Standings.index[p],
                                         Seats_total_init)
                 for p in range(Standings.shape[0])}
 
-namelist    = Standings.index
-Num_parties = len(all_parties)
+party_namelist  = all_parties.keys()
+Num_parties     = len(party_namelist)
 # includes "spoiled" and "independent"
 
 # ------- Combine and sort quotient lists from each party -----------
 Total_quotient_list=[]
-for p in all_parties.keys():
+for p in party_namelist:
     Total_quotient_list.extend( all_parties[p].party_quotient_list )
 Total_quotient_list.sort(reverse=True)
 
@@ -117,26 +110,31 @@ Total_quotient_list.sort(reverse=True)
 # Sanity check, all constituency seats are assigned, and no others are:
 assert all([seat.assigned for seat in Total_quotient_list[0:Seats_total_init-1]]) and not any( [seat.assigned for seat in Total_quotient_list[Seats_total_init:]] ), "ERROR: Total_quotient_list not properly sorted, or inconsistent with expected seat number."
 
-# --- Document the quotient list in a tsv file:
-shortlist = Total_quotient_list[:2*Seats_total_init]
+# Shorten list to the first 1:2*Seats_total_init
 # (nothing beyond this list has any chance of consideration.
-len( shortlist)
+shortlist = Total_quotient_list[:2*Seats_total_init]
 Qlist = pd.DataFrame({"j"        :[ q.jval   for q in shortlist],
                       "Value"    :[ q.value  for q in shortlist],
                       "Assigned" :[ int(q.assigned) for q in shortlist],
                       "party"    :[ q.party_att     for q in shortlist],
                       } )
+# --- Document the quotient list in a tsv file:
 Qlist.round(2).to_csv(f_qlist_out, sep="\t")
+
 
 # ------------------------------------------------------------------
 # --- Now define Threshold, initialize baseline, and begin to "grow"
 # --- by adding quotients until proportionality is reached
-Threshold = Total_quotient_list[Seats_total_init-1].value
-total_seats_assigned = Seats_total_init
+approx_Threshold = Total_quotient_list[Seats_total_init-1].value
 
-# Starting from the first unassigned seat
+
+# Initialize from the first unassigned seat
+total_seats_assigned = Seats_total_init
 sval = Seats_total_init
+
 while (sval < 2*Seats_total_init):
+    # Hard cut-off at 2*Seats_total_init no matter proportionality status.
+    # Very unlikely that this will be approached.
     sval += 1
     current_party = Total_quotient_list[sval].party_att
 
