@@ -72,7 +72,7 @@ party_abbrev = {
 }
 
 # --- Extract party seat standings from table
-def get_party_seat_standings(Seats_init):
+def get_party_seat_standings(Seats_init, maj_parties):
     """Obtain Seat assignments from standard table issued by Elections Canada
     Here, there are multiplie columns for each party, divided by gender,
     condensed here.
@@ -90,22 +90,30 @@ def get_party_seat_standings(Seats_init):
      index = ["LIB","CON","BLQ","NDP","GRN","OTH","TOT"]
     )
 
-    standings = pd.Series( [ sum( Seats_init[party_cols[p]].sum()) for p in range(len(party_cols)) ],
-                                index = party_cols.index )
+    # First gather seat counts for major parties:
+    maj_party_cols = party_cols[maj_parties]
+    Seats_out      = pd.Series( [ sum( Seats_init[maj_party_cols[p]].sum()) for p in range(len(maj_party_cols)) ],
+                                  index = maj_party_cols.index )
+    # Now gather the "OTHer" seats
+
+    # Flatten the above list of lists of cols for ALL major parties:
+    flat_mpc = [item for sublist in maj_party_cols for item in sublist]
+
+    # Get a list of all col's that are neither a "total" col nor associated with a major party
+    OTHer_cols = [ c for c in list(Seats_init) if (not (c in party_cols["TOT"]) and (not c in flat_mpc) ) ]
+
+    Seats_out["OTH"] = sum(Seats_init[OTHer_cols].sum())
+    Seats_out["SPL"] = 0
+    # Spoiled seat count will always =0
 
     #--------- Sanity checks:
     # Ensure all columns accounted for:
-    assert Seats_init.shape[1] == sum(  [ len(party_cols[p]) for p in range( len(party_cols)) ] ) , "Party name change must be accounted for"
+    assert Seats_init.shape[1] == len(flat_mpc) + len(OTHer_cols) + len(party_cols["TOT"]), "Party names don't match current party names"
 
     # Ensure all seats add up to the total:
-    Total_seats = standings["TOT"]
-    standings.drop("TOT", inplace =True)
-    assert sum( standings ) == Total_seats, "Failed to allocate all seats to a party"
+    assert sum( Seats_init[party_cols["TOT"]].sum()) == Seats_out.sum(), "Failed to allocate all seats to a party"
 
-    # Add a "Spoil" entry (which will always have seats = 0)
-    standings = pd.concat([ standings, pd.Series([0],index=["SPL"]) ] )
-
-    return standings
+    return Seats_out
 
 # -------------------------------
 def shouldbe_done( current_seatnum, partylist, maj_parties):
