@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class quotient():
     """A class representing a single quotient."""
@@ -22,6 +23,7 @@ class quotient():
     def __gt__(self, other):
         return  other < self
 
+# ====================================================
 # --- Define class object "party"
 class party():
   """A class representing a party -- each instance will end up with a
@@ -46,79 +48,109 @@ class party():
                                              j )
                                    for j in range(2*Seats_total_init) ]
 
-# Define shorthand abbreviations for parties
-party_abbrev = {
-    'Animal Protection Party of Canada/Le Parti pour la Protection des Animaux du Canada':"APP",
-    'Bloc Québécois/Bloc Québécois':"BLQ",
-    "Canada's Fourth Front/Quatrième front du Canada":"C4F",
-    'Canadian Nationalist Party/Parti Nationaliste Canadien':"CNP",
-    "Christian Heritage Party of Canada/Parti de l'Héritage Chrétien du Canada":"CHP",
-    'Communist Party of Canada/Parti communiste du Canada':"COM",
-    'Conservative Party of Canada/Parti conservateur du Canada':"CON",
-    'Green Party of Canada/Le Parti Vert du Canada':"GRN",
-    'Liberal Party of Canada/Parti libéral du Canada':"LIB",
-    'Libertarian Party of Canada/Parti Libertarien du Canada':"LRT",
-    'Marijuana Party/Parti Marijuana':"MJP",
-    'Marxist-Leninist Party of Canada/Parti Marxiste-Léniniste du Canada':"MLP",
-    'National Citizens Alliance of Canada/Alliance Nationale des Citoyens du Canada':"NCA",
-    'New Democratic Party/Nouveau Parti démocratique':"NDP",
-    "Parti pour l'Indépendance du Québec/Parti pour l'Indépendance du Québec":"PIQ",
-    'Parti Rhinocéros Party/Parti Rhinocéros Party':"RIN",
-    "People's Party of Canada/Parti populaire du Canada":"PPC",
-    'Progressive Canadian Party/Parti Progressiste Canadien':"PCP",
-    'Stop Climate Change/Arrêtons le changement climatique':"SCC",
-    'The United Party of Canada/Parti Uni du Canada':"UPC",
-    'Veterans Coalition Party of Canada/Parti de la coalition des anciens combattants du Canada':"VET"
+
+# ====================================================
+party_codes_en = {
+    #    Define shorthand abbreviations for parties based on key strings
+    #    i.e. any party name that contains "Rhinoc" is assumed to be the Rhinocerous party, etc...
+    #    this avoids issues with character encoding, etc. 
+    'Animal Protection Party':"APP",
+    'Bloc Qu':"BLQ",
+    "Fourth Front":"C4F",
+    'Canadian Nationalist Party':"CNP",
+    "Christian Heritage Party":"CHP",
+    'Communist Party':"COM",
+    'Conservative Party':"CON",
+    'Green Party':"GRN",
+    'Liberal Party':"LIB",
+    'Libertarian Party':"LRT",
+    'Marijuana Party':"MJP",
+    'Marxist-Leninist Party':"MLP",
+    'National Citizens Alliance':"NCA",
+    'New Democratic Party':"NDP",
+    "pendance du Qu":"PIQ",
+    'Rhinoc':"RIN",
+    "People's Party":"PPC",
+    'Progressive Canadian Party':"PCP",
+    'Stop Climate Change':"SCC",
+    'The United Party':"UPC",
+    'Veterans Coalition Party':"VET",
+    'Autres':"OTH",
+    "Total":"TOT"
 }
 
-# --- Extract party seat standings from table
-def get_party_seat_standings(Seats_init, maj_parties):
-    """Obtain Seat assignments from standard table issued by Elections Canada
-    Here, there are multiplie columns for each party, divided by gender,
-    condensed here.
+party_codes_fr= {
+    'Protection des Animaux':"APP",
+    'Bloc Québécois':"BLQ",
+    "Quatrième front":"C4F",
+    'Parti Nationaliste':"CNP",
+    "Parti de l'Héritage Chrétien":"CHP",
+    'Parti communiste':"COM",
+    'Parti conservateur':"CON",
+    'Le Parti Vert':"GRN",
+    'Parti libéral':"LIB",
+    'Parti Libertarien':"LRT",
+    'Parti Marijuana':"MJP",
+    'Parti Marxiste-Léniniste':"MLP",
+    'Alliance Nationale':"NCA",
+    'Nouveau Parti démocratique':"NDP",
+    "l'Indépendance du Québec":"PIQ",
+    'Parti Rhinocéros':"RIN",
+    "Parti populaire":"PPC",
+    'Parti Progressiste':"PCP",
+    'Arrêtons le changement climatique':"SCC",
+    'Parti Uni':"UPC",
+    'Parti de la coalition des anciens combattants':"VET",
+    'Other':"OTH",
+    "Total":"TOT"
+}
+# ====================================================
+def code_for_single_label(label, party_codes_en, party_codes_fr):
+    map_en = [ party_codes_en[s] for s in party_codes_en.keys() if s in label ] 
+    map_fr = [ party_codes_fr[s] for s in party_codes_fr.keys() if s in label ] 
+    
+    assert len(map_en)<=1, "Multiple English matches for label %s"%label
+    assert len(map_fr)<=1, "Multiple French  matches for label %s"%label    
+    assert (len(map_fr) + len(map_en) ) >=1, "No matches for label %s in either language"%label
+    
+    if( len(map_fr) == 1 and len(map_en)==1 ):
+        assert map_fr[0] == map_en[0], "Different matches for label %s; Eng:%s, Fr:%s"%(label, map_en[0],map_fr[0])
 
-    Also, party names have changed over time, so for old elections this
-    function will need to be revised.  """
-    party_cols = pd.Series( [
-        list( filter(lambda x: "Liberal Party of Canada" in x, Seats_init) ),
-        list( filter(lambda x: "Conservative Party of Canada" in x, Seats_init) ),
-        list( filter(lambda x: "Bloc Québécois" in x, Seats_init) ),
-        list( filter(lambda x: "New Democratic Party" in x, Seats_init) ),
-        list( filter(lambda x: "Green Party of Canada" in x, Seats_init) ),
-        list( filter(lambda x: "Others" in x, Seats_init) ),
-        list( filter(lambda x: "Total_" in x, Seats_init) )],
-     index = ["LIB","CON","BLQ","NDP","GRN","OTH","TOT"]
-    )
+    if( len(map_en) == 1):
+        return (map_en[0])
+    else:
+        return (map_fr[0])   
+# ====================================================
+def standardize_party_labels( DF, party_codes_en, party_codes_fr, axis_in=1):
+    """Convert the long and complicated labels for various political parties 
+    into standard 3-letter codes, based on a dict of unique strings that 
+    tend to appear in each name.
+    e.g. anythin with 'Bloc Qu' will become 'BLQ', to avoid unicode issues with
+    the e' characters.
+    """    
+    assert axis_in == 0 or axis_in == 1, "Invalid axis_in %d"%axis_in
+    if( axis_in == 1):
+        names_init = list(DF)
+    elif( axis_in == 0 ):
+        assert len( list(DF.shape) ) == 1, "Standardizing row labels should only happen for type pd.Series (i.e. single column)"
+        names_init = DF.index    
+    
+    pcodes    = np.array( [ code_for_single_label(name, party_codes_en, party_codes_fr) for name in names_init] )
+    label_out = sorted( list(set(pcodes)))
 
-    # First gather seat counts for major parties:
-    maj_party_cols = party_cols[maj_parties]
-    Seats_out      = pd.Series( [ sum( Seats_init[maj_party_cols[p]].sum()) for p in range(len(maj_party_cols)) ],
-                                  index = maj_party_cols.index )
-    # Now gather the "OTHer" seats
+    if( axis_in == 1):
+        result = pd.DataFrame( { label: DF.loc[:,pcodes == label].sum(axis=axis_in) for label in label_out } )
+    elif( axis_in == 0 ):
+        result  = DF.copy()
+        result.index=label_out
+    
+    return result
 
-    # Flatten the above list of lists of cols for ALL major parties:
-    flat_mpc = [item for sublist in maj_party_cols for item in sublist]
-
-    # Get a list of all col's that are neither a "total" col nor associated with a major party
-    OTHer_cols = [ c for c in list(Seats_init) if (not (c in party_cols["TOT"]) and (not c in flat_mpc) ) ]
-
-    Seats_out["OTH"] = sum(Seats_init[OTHer_cols].sum())
-    Seats_out["SPL"] = 0
-    # Spoiled seat count will always =0
-
-    #--------- Sanity checks:
-    # Ensure all columns accounted for:
-    assert Seats_init.shape[1] == len(flat_mpc) + len(OTHer_cols) + len(party_cols["TOT"]), "Party names don't match current party names"
-
-    # Ensure all seats add up to the total:
-    assert sum( Seats_init[party_cols["TOT"]].sum()) == Seats_out.sum(), "Failed to allocate all seats to a party"
-
-    return Seats_out
-
-# -------------------------------
+# ====================================================
 def shouldbe_done( current_seatnum, partylist, maj_parties):
     """Obtain a boolean characterizing whether all major parties
-    are currently owed less than 1 seat."""
+    are currently owed less than 1 seat. Useful for debugging. 
+    When this returns True, the while loop should terminate. """
     return all( [current_seatnum*(partylist[p].vote_share)-partylist[p].seats_assigned < 1 for p in maj_parties] )
 
 
