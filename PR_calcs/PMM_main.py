@@ -26,6 +26,10 @@ f_init_standings_out = os.path.join( pathstr, "PMM_out", "party_Standings_init.t
 f_qlist_out     = os.path.join( pathstr, "PMM_out", "PMM_qlist.tsv")
 f_standings_out = os.path.join( pathstr, "PMM_out", "PMM_standings.tsv")
 
+# output plots:
+img_format=".pdf"
+fout_figs_PMM_proj = os.path.join( pathstr, "PMM_out", "PMM_projections"+img_format)
+
 # ======================================================
 # Collect info from raw EC tables:
 # i.e.: info on total # votes cast & turnout.
@@ -102,7 +106,6 @@ Const_Seats["OTH"] = sum( Const_Seats_all_parties_with_seats[ [p for p in Const_
 Const_Seats["SPL"] = 0
 
 Standings = pd.DataFrame( {"Votes":Vote_counts, "Seats_init": Const_Seats } )
-Standings
 
 # OUTPUT this part for documentation:
 Standings.to_csv( f_init_standings_out, sep="\t" )
@@ -152,10 +155,6 @@ approx_Threshold = Total_quotient_list[Seats_total_init-1].value
 total_seats_assigned = Seats_total_init
 sval = Seats_total_init
 
-# Initialize from the first unassigned seat
-total_seats_assigned = Seats_total_init
-sval = Seats_total_init
-
 while (sval < 2*Seats_total_init):
     # Hard cut-off at 2*Seats_total_init no matter proportionality status.
     # Very unlikely that this will be approached.
@@ -174,23 +173,25 @@ while (sval < 2*Seats_total_init):
     else:
         pass
 # ======================================================
-# Finished assigning extra seats -----------
-# ------------------------------------------------------------------
+# Finished assigning extra seats 
 
-Standings_final = pd.DataFrame({"Party": list( parties.keys() ),
-                      "Seats_initial"  :[ parties[p].Seats_initial  for p in parties],
+Standings_final = pd.DataFrame({ "Seats_initial"  :[ parties[p].Seats_initial  for p in parties],
                       "Votes"          :[ parties[p].Votes          for p in parties ],
                       "Vote_share"     :[ parties[p].vote_share     for p in parties],
                       "Seats_final"    :[ parties[p].seats_assigned for p in parties ],
                       "Seat_share"     :[(parties[p].seats_assigned)/total_seats_assigned  for p in parties]
-                      } )
+                      }, index = parties.keys() )
+Seats_total_final = Standings_final["Seats_final"].sum()
 
 print("Proportionality, based on all of the above ballots, can be minimally achieved as follows:")
 print(Standings_final)
 #and output to file:
 Standings_final.round(4).to_csv(f_standings_out, sep="\t")
+
 # ==============================================================
 #         CALCULATIONS FINISHED. NOW START PLOTTING
-# ==============================================================
+
+print("Plotting projection...")
+PMM.plot_projection( Standings_final, year, fout_figs_PMM_proj) 
 
 print("\nPMM program complete.")
