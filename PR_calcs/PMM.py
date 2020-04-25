@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+import matplotlib.image as mpimg
+from matplotlib.offsetbox import TextArea, DrawingArea, OffsetImage, AnnotationBbox
+
+
 class quotient():
     """A class representing a single quotient."""
     def __init__(self, party_att_in = "NULL", assigned_in = False, value_in = 0, jval_in = 0 ):
@@ -54,7 +58,7 @@ class party():
 party_codes_en = {
     #    Define shorthand abbreviations for parties based on key strings
     #    i.e. any party name that contains "Rhinoc" is assumed to be the Rhinocerous party, etc...
-    #    this avoids issues with character encoding, etc. 
+    #    this avoids issues with character encoding, etc.
     'Animal Protection Party':"APP",
     'Bloc Qu':"BLQ",
     "Fourth Front":"C4F",
@@ -105,8 +109,8 @@ party_codes_fr= {
     "Total":"TOT"
 }
 # ====================================================
-colours= { 
-    "trans":{    
+colours= {
+    "trans":{
             "BLQ" : "#33FFFF99",
             "CON" : "#0000CC99",
             "GRN" : "#33660099",
@@ -114,7 +118,7 @@ colours= {
             "NDP" : "#FF800099",
             "OTH":"#707070"
     },
-    "solid":{        
+    "solid":{
             "BLQ"  : "#33FFFFFF",
             "CON"  : "#0000CCFF",
             "GRN"  : "#336600FF",
@@ -124,7 +128,7 @@ colours= {
     }
 }
 # ====================================================
-Logos= {    
+Logos= {
         "BLQ" : "images_post/logos/BLQ.png",
         "CON" : "images_post/logos/CON.png",
         "GRN" : "images_post/logos/GRN.png",
@@ -142,35 +146,35 @@ symbols= {
 }
 # ====================================================
 def code_for_single_label(label, party_codes_en, party_codes_fr):
-    map_en = [ party_codes_en[s] for s in party_codes_en.keys() if s in label ] 
-    map_fr = [ party_codes_fr[s] for s in party_codes_fr.keys() if s in label ] 
-    
+    map_en = [ party_codes_en[s] for s in party_codes_en.keys() if s in label ]
+    map_fr = [ party_codes_fr[s] for s in party_codes_fr.keys() if s in label ]
+
     assert len(map_en)<=1, "Multiple English matches for label %s"%label
-    assert len(map_fr)<=1, "Multiple French  matches for label %s"%label    
+    assert len(map_fr)<=1, "Multiple French  matches for label %s"%label
     assert (len(map_fr) + len(map_en) ) >=1, "No matches for label %s in either language"%label
-    
+
     if( len(map_fr) == 1 and len(map_en)==1 ):
         assert map_fr[0] == map_en[0], "Different matches for label %s; Eng:%s, Fr:%s"%(label, map_en[0],map_fr[0])
 
     if( len(map_en) == 1):
         return (map_en[0])
     else:
-        return (map_fr[0])   
+        return (map_fr[0])
 # ====================================================
 def standardize_party_labels( DF, party_codes_en, party_codes_fr, axis_in=1):
-    """Convert the long and complicated labels for various political parties 
-    into standard 3-letter codes, based on a dict of unique strings that 
+    """Convert the long and complicated labels for various political parties
+    into standard 3-letter codes, based on a dict of unique strings that
     tend to appear in each name.
     e.g. anythin with 'Bloc Qu' will become 'BLQ', to avoid unicode issues with
     the e' characters.
-    """    
+    """
     assert axis_in == 0 or axis_in == 1, "Invalid axis_in %d"%axis_in
     if( axis_in == 1):
         names_init = list(DF)
     elif( axis_in == 0 ):
         assert len( list(DF.shape) ) == 1, "Standardizing row labels should only happen for type pd.Series (i.e. single column)"
-        names_init = DF.index    
-    
+        names_init = DF.index
+
     pcodes    = np.array( [ code_for_single_label(name, party_codes_en, party_codes_fr) for name in names_init] )
     label_out = sorted( list(set(pcodes)))
 
@@ -179,13 +183,13 @@ def standardize_party_labels( DF, party_codes_en, party_codes_fr, axis_in=1):
     elif( axis_in == 0 ):
         result  = DF.copy()
         result.index=label_out
-    
+
     return result
 
 # ====================================================
 def shouldbe_done( current_seatnum, partylist, maj_parties):
     """Obtain a boolean characterizing whether all major parties
-    are currently owed less than 1 seat. Useful for debugging. 
+    are currently owed less than 1 seat. Useful for debugging.
     When this returns True, the while loop should terminate. """
     return all( [current_seatnum*(partylist[p].vote_share)-partylist[p].seats_assigned < 1 for p in maj_parties] )
 
@@ -205,17 +209,17 @@ def plot_quotients_by_party( maj_party_codes, year, Full_parl_Q, partylist, fout
                      [ q.value for q in partylist[p].party_quotient_list ],
                      color  = colours["trans"][p],
                      marker = symbols[p],
-                     alpha  = 0.5 
+                     alpha  = 0.5
                     )
     plt.xlim([xmin, xmax])
     plt.ylim([ymin, ymax])
-    plt.yscale('log')   
+    plt.yscale('log')
     plt.legend( maj_party_codes,
                 fontsize=15)
 
     thresh_draw = plt.plot( [xmin, xmax],
                             [ Full_parl_Q, Full_parl_Q],
-                            "-k", 
+                            "-k",
                             alpha=0.5,
                             lw = 5)
 
@@ -225,7 +229,7 @@ def plot_quotients_by_party( maj_party_codes, year, Full_parl_Q, partylist, fout
     ax = plt.gca()
     # ax.yaxis.set_label_coords(0.0, 1.05)
 
-    plt.title( "Quotients "+str(year)+", Major Parties", 
+    plt.title( "Quotients "+str(year)+", Major Parties",
                fontsize=18 )
     plt.savefig(fout, bbox_inches="tight")
 
@@ -234,19 +238,19 @@ def plot_all_quotients( maj_party_codes, year, Qlist_raw, fout ):
     """Plot all quotients together"""
 
     # Remove one point from each party and plot separately to create a legend.
-    First_points = [ min( [q for q in range(len(Qlist_raw)) if Qlist_raw[q].party_att==party] ) for party in maj_party_codes ] 
-    Qlist = [ Qlist_raw[q] for q in range(len(Qlist_raw)) if ( (Qlist_raw[q].party_att in maj_party_codes) and ( not q in First_points)) ] 
+    First_points = [ min( [q for q in range(len(Qlist_raw)) if Qlist_raw[q].party_att==party] ) for party in maj_party_codes ]
+    Qlist = [ Qlist_raw[q] for q in range(len(Qlist_raw)) if ( (Qlist_raw[q].party_att in maj_party_codes) and ( not q in First_points)) ]
 
     # create plot
-    fig, ax = plt.subplots()  
+    fig, ax = plt.subplots()
     # Now plot just those first points to establish a legend
     for k in First_points:
-        plt.scatter( k, 
+        plt.scatter( k,
                      Qlist_raw[k].value,
                      color  = colours["solid"][Qlist_raw[k].party_att],
                      marker = symbols[Qlist_raw[k].party_att],
                     )
-        
+
     maxQ = max( [Qlist_raw[k].value for k in First_points] )
     ymax = 1.1*maxQ
     plt.legend( maj_party_codes,
@@ -262,7 +266,7 @@ def plot_all_quotients( maj_party_codes, year, Qlist_raw, fout ):
     y_dat   = [q.value for q in Qlist]
 
     for k in range(Npoints):
-        plt.scatter( x_dat[k], 
+        plt.scatter( x_dat[k],
                      y_dat[k],
                      color  = ccode[k],
                      marker = mcode[k],
@@ -275,7 +279,7 @@ def plot_all_quotients( maj_party_codes, year, Qlist_raw, fout ):
     plt.ylim([ymin, ymax])
     thresh_draw = plt.plot( [min(x_dat), max(x_dat)],
                             [THRESH, THRESH],
-                            "-k", 
+                            "-k",
                             alpha=0.5,
                             lw = 5)
 
@@ -292,6 +296,11 @@ def plot_projection( Standings, year, fout):
     # data to plot
     n_groups = Standings.shape[0]-1
 
+    # xtick value must be assigned to create space for party logos
+    # hence, x ticks are set to be a single space character " "
+    # in all but the final case, where it is "Other"
+    xtick_trick = [" " for p in range(n_groups-1)]
+    xtick_trick.append("Other")
     # create plot
     fig, ax       = plt.subplots()
     x_positions   = np.arange(n_groups)
@@ -304,15 +313,15 @@ def plot_projection( Standings, year, fout):
     Seats_total_final = Standings["Seats_final"].sum()
     maj_final = 0.5*Seats_total_final
 
-    rects1 = plt.bar( x_positions, 
-                      Standings["Seats_initial"][:-1], 
+    rects1 = plt.bar( x_positions,
+                      Standings["Seats_initial"][:-1],
                       bar_width,
                       alpha=opaque,
                       color=[ colours["solid"][p]  for p in Standings.index[:-1] ],
                       label='Initial')
 
-    rects2 = plt.bar( x_positions + bar_width, 
-                      Standings["Seats_final"][:-1], 
+    rects2 = plt.bar( x_positions + bar_width,
+                      Standings["Seats_final"][:-1],
                       bar_width,
                       alpha=semitrans,
                       color=[ colours["trans"][p]  for p in Standings.index[:-1] ],
@@ -334,9 +343,9 @@ def plot_projection( Standings, year, fout):
                                  ls='-')
                )
 
-    ax.annotate('Majority', 
-                 xy=( xmax-bar_width, 0.5*Seats_total_init-15),
-                 xycoords='data', 
+    ax.annotate('Majority',
+                 xy=( xmax-2*bar_width, 0.5*Seats_total_init-15),
+                 xycoords='data',
                  fontsize=15,
                  # xytext=(0.8, 0.5), textcoords='axes fraction'
                  # , horizontalalignment='right', verticalalignment='top',
@@ -346,27 +355,32 @@ def plot_projection( Standings, year, fout):
     # plt.xlabel('Party', fontsize=15)
     plt.ylabel('Seats', fontsize=18)
     plt.title("Projection, "+str(year), fontsize=18 )
+    # Remove x-ticks:
     # ax.set_xticks([], [])
-    plt.xticks(x_positions + bar_width, tuple( list(Standings.index[:-1])), fontsize=18 )
+    # place xticks (empty space except for final "Other")
+    plt.xticks(x_positions + bar_width, tuple( xtick_trick), fontsize=18)
 
-    #######
-    # # Far too much time was wasted here trying to import the party logos 
-    # # automatically. Unfortunately matplotlib doesn't want to let me add
-    # # enough space for them at the bottom of the figure (illustrative example 
-    # # of attempts thus far commented out below). The kludge fix is to add 
-    # # them in manually for each figure --an ugly and unsatisfying workaround.
-    # # If anyone can suggest how to fix this, please post an issue or PR
-    #
+    # Embed party logos in projection figure:
+    for p in range(n_groups-1):
+        logo = mpimg.imread(Logos[Standings.index[p]])
+        logobox = OffsetImage(logo, zoom=0.4)
+        ab = AnnotationBbox( logobox,
+                          xy = (x_positions[p]+0.25*bar_width, 1),
+                          xybox=(x_positions[p]+0.95*bar_width, -10),
+        #                     xycoords='figure fraction',
+                          frameon=True,
+                          pad=0 )
+        ax.add_artist(ab)
+
+    plt.tight_layout()
+
     # p=0
-    # logo = mpimg.imread(Logos[Standings_final.index[p]])
-    # logobox = OffsetImage(logo, zoom=0.5)
-    # ab = AnnotationBbox( logobox, 
-    #                   xy = (x_positions[p]+0.25*bar_width, 1), 
-    #                   xybox=(x_positions[p]+0.95*bar_width, 2),
-    # #                     xycoords='figure fraction',
-    #                   frameon=True, 
-    #                   pad=0 )
-    # ax.add_artist(ab)
+    # ax.figure.figimage( Logos[Standings.index[p]] )
+
+#    im     = Image.open('/home/jofer/logo.png')
+#    height = im.size[1]
+#    im = np.array(im).astype(np.float) / 255
+#    fig.figimage(im, 0, fig.bbox.ymax - height)
+#
+
     plt.savefig(fout, bbox_inches="tight")
-
-
