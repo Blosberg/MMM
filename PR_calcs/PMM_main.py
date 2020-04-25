@@ -30,7 +30,7 @@ f_standings_out = os.path.join( pathstr, "PMM_out", "PMM_standings.tsv")
 img_format=".pdf"
 fout_figs_PMM_proj  = os.path.join( pathstr, "PMM_out", "PMM_projections"+img_format)
 fout_figs_Qlist_all = os.path.join( pathstr, "PMM_out", "PMM_Qlist_all"+img_format)
-fout_figs_Qlist_majparties = os.path.join( pathstr, "PMM_out", "PMM_Qlist_majparties"+img_format)
+fout_figs_Qlist_byparty = os.path.join( pathstr, "PMM_out", "PMM_Qlist_byparty"+img_format)
 
 # ======================================================
 # Collect info from raw EC tables:
@@ -196,11 +196,11 @@ Standings_final.round(4).to_csv(f_standings_out, sep="\t")
 
 print("Plotting major party quotient lists...")
 Full_parl_THRESH = sorted( [ q.value for q in shortlist if q.party_att in maj_party_standard_labels ] , reverse=True )[ Seats_total_init]   
-PMM.plot_quotients_each_party( maj_party_standard_labels, 
+PMM.plot_quotients_by_party( maj_party_standard_labels, 
                                year=year, 
                                Full_parl_Q = Full_parl_THRESH,
                                partylist=parties, 
-                               fout=fout_figs_Qlist_majparties)
+                               fout=fout_figs_Qlist_byparty)
 
 print("Plotting Full quotient list sorted...")
 PMM.plot_all_quotients( maj_party_standard_labels, year, shortlist, fout_figs_Qlist_all)
