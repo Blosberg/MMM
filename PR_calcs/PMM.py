@@ -329,8 +329,11 @@ def plot_projection( Standings, year, fout):
 
     xmin = -0.5*bar_width
     xmax = bar_width*(2*(n_groups+1))
-    maj_thresh_b4    = plt.plot([xmin, xmax],[maj_init,  maj_init],"-k")
-    maj_thresh_after = plt.plot([xmin, xmax],[maj_final, maj_final],"--k")
+    maj_thresh_b4    = plt.plot([xmin, xmax],[maj_init,  maj_init],"--k")
+    maj_thresh_after = plt.plot([xmin, xmax],
+                                [maj_final, maj_final],
+                                 "--k",
+                                 alpha=semitrans)
 
     # No text in this annotation, to ensure that the arrow goes straight vertical
     ax.annotate('', xy=(xmax, 0.5*Seats_total_final),
@@ -340,8 +343,9 @@ def plot_projection( Standings, year, fout):
                  arrowprops=dict(arrowstyle= '->',
                                  color='black',
                                  lw=2.0,
-                                 ls='-')
-               )
+                                 ls='-',
+                                 alpha=semitrans)
+                 )
 
     ax.annotate('Majority',
                  xy=( xmax-2*bar_width, 0.5*Seats_total_init-15),
@@ -363,7 +367,7 @@ def plot_projection( Standings, year, fout):
     # Embed party logos in projection figure:
     for p in range(n_groups-1):
         logo = mpimg.imread(Logos[Standings.index[p]])
-        logobox = OffsetImage(logo, zoom=0.4)
+        logobox = OffsetImage(logo, zoom=0.45)
         ab = AnnotationBbox( logobox,
                           xy = (x_positions[p]+0.25*bar_width, 1),
                           xybox=(x_positions[p]+0.95*bar_width, -10),
@@ -372,6 +376,13 @@ def plot_projection( Standings, year, fout):
                           pad=0 )
         ax.add_artist(ab)
 
+    # Add small marker line for each party to indicate their proportional seat #
+    for p in range(n_groups-1):
+        prop_seatnum = Standings["Vote_share"][p]*Seats_total_final
+        prop_seats   = plt.plot( [x_positions[p]-0.5*bar_width, x_positions[p]+(1.5*bar_width)],
+                                 [prop_seatnum,  prop_seatnum],
+                                 "-k",
+                                 linewidth=1.0 )
     plt.tight_layout()
 
     # p=0
