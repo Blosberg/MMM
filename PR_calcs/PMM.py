@@ -132,6 +132,14 @@ Logos= {
         "NDP" : "images_post/logos/NDP.png",
         "OTH" : "images_post/logos/OTH.png"
 }
+symbols= {
+        "BLQ" : "o",
+        "CON" : "v",
+        "GRN" : "P",
+        "LIB" : "s",
+        "NDP" : "D",
+        "OTH" : "x"
+}
 # ====================================================
 def code_for_single_label(label, party_codes_en, party_codes_fr):
     map_en = [ party_codes_en[s] for s in party_codes_en.keys() if s in label ] 
@@ -252,7 +260,7 @@ def plot_projection( Standings, year, fout):
     # # If anyone can suggest how to fix this, please post an issue or PR
     #
     # p=0
-    # logo = mpimg.imread(PMM.Logos[Standings_final.index[p]])
+    # logo = mpimg.imread(Logos[Standings_final.index[p]])
     # logobox = OffsetImage(logo, zoom=0.5)
     # ab = AnnotationBbox( logobox, 
     #                   xy = (x_positions[p]+0.25*bar_width, 1), 
@@ -261,8 +269,93 @@ def plot_projection( Standings, year, fout):
     #                   frameon=True, 
     #                   pad=0 )
     # ax.add_artist(ab)
-
-
     plt.savefig(fout, bbox_inches="tight")
 
-    return 0
+# ====================================================
+def plot_quotients_each_party( maj_party_codes, year, Full_parl_Q, partylist, fout):
+    """Plot quotient lists for each party separately."""
+
+    maxQ = max( [partylist[p].party_quotient_list[0].value for p in maj_party_codes] )
+
+    xmin = -5
+    xmax = 200
+    ymin = 0.5 * Full_parl_Q
+    ymax = maxQ
+
+    for p in maj_party_codes:
+        plt.scatter( range(len(partylist[p].party_quotient_list)),
+                     [ q.value for q in partylist[p].party_quotient_list ],
+                     color  = colours["trans"][p],
+                     marker = symbols[p],
+                     alpha  = 0.5 
+                    )
+    plt.xlim([xmin, xmax])
+    plt.ylim([ymin, ymax])
+    plt.yscale('log')   
+    plt.legend( maj_party_codes )
+
+    thresh_draw = plt.plot( [xmin, xmax],
+                            [ Full_parl_Q, Full_parl_Q],
+                            "-k", 
+                            alpha=0.5,
+                            lw = 5)
+
+    plt.xlabel('$j$',   fontsize=15)
+    plt.ylabel('$Q_j$', fontsize=15)
+
+    ax = plt.gca()
+    # ax.yaxis.set_label_coords(0.0, 1.05)
+
+    plt.title( "Quotients "+str(year)+", Major Parties", fontsize=15 )
+    plt.savefig(fout, bbox_inches="tight")
+
+# ====================================================
+def plot_all_quotients( maj_party_codes, year, Qlist_raw, fout ):
+    """Plot all quotients together"""
+
+    # Remove one point from each party and plot separately to create a legend.
+    First_points = [ min( [q for q in range(len(Qlist_raw)) if Qlist_raw[q].party_att==party] ) for party in maj_party_codes ] 
+    Qlist = [ Qlist_raw[q] for q in range(len(Qlist_raw)) if ( (Qlist_raw[q].party_att in maj_party_codes) and ( not q in First_points)) ] 
+
+    # create plot
+    fig, ax = plt.subplots()  
+    # Now plot just those first points to establish a legend
+    for k in First_points:
+        plt.scatter( k, 
+                     Qlist_raw[k].value,
+                     color  = colours["solid"][Qlist_raw[k].party_att],
+                     marker = symbols[Qlist_raw[k].party_att],
+                    )
+    plt.legend( maj_party_codes )
+    plt.ylim([10000,10000000])
+    plt.yscale('log')
+
+    # Define color-code and marker code lists for the remaining points
+    ccode = [ colours["solid"][q.party_att] for q in Qlist ]
+    mcode = [ symbols[q.party_att] for q in Qlist ]
+    Npoints = len(Qlist)
+
+    x_dat   = range(Npoints)
+    y_dat   = [q.value for q in Qlist]
+
+    for k in range(Npoints):
+        plt.scatter( x_dat[k], 
+                     y_dat[k],
+                     color  = ccode[k],
+                     marker = mcode[k],
+                    )
+
+
+    # threshold for smallest constituent quotient
+    THRESH      = min( [ q.value for q in Qlist if q.assigned ])
+    thresh_draw = plt.plot( [min(x_dat), max(x_dat)],
+                            [THRESH, THRESH],
+                            "-k", 
+                            alpha=0.5,
+                            lw = 5)
+
+    plt.xlabel('$i$',   fontsize=15)
+    plt.ylabel('$Q_i$', fontsize=15)
+    plt.title( "Quotients "+str(year)+", Ordered", fontsize=15 )
+
+    plt.savefig(fout, bbox_inches="tight")

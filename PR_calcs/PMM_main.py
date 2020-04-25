@@ -28,7 +28,9 @@ f_standings_out = os.path.join( pathstr, "PMM_out", "PMM_standings.tsv")
 
 # output plots:
 img_format=".pdf"
-fout_figs_PMM_proj = os.path.join( pathstr, "PMM_out", "PMM_projections"+img_format)
+fout_figs_PMM_proj  = os.path.join( pathstr, "PMM_out", "PMM_projections"+img_format)
+fout_figs_Qlist_all = os.path.join( pathstr, "PMM_out", "PMM_Qlist_all"+img_format)
+fout_figs_Qlist_majparties = os.path.join( pathstr, "PMM_out", "PMM_Qlist_majparties"+img_format)
 
 # ======================================================
 # Collect info from raw EC tables:
@@ -114,10 +116,10 @@ Standings.to_csv( f_init_standings_out, sep="\t" )
 # Now start building party classes
 
 parties = { Standings.index[p]: PMM.party( Standings.index[p], 
-                                        Standings.iloc[p,0], 
-                                        Standings.iloc[p,1],
-                                        N_total_votes,
-                                        Seats_total_init)
+                                           Standings.iloc[p,0], 
+                                           Standings.iloc[p,1],
+                                           N_total_votes,
+                                           Seats_total_init)
         for p in range(Standings.shape[0])}
 
 party_namelist  = parties.keys()
@@ -191,7 +193,19 @@ Standings_final.round(4).to_csv(f_standings_out, sep="\t")
 # ==============================================================
 #         CALCULATIONS FINISHED. NOW START PLOTTING
 
-print("Plotting projection...")
+
+print("Plotting major party quotient lists...")
+Full_parl_THRESH = sorted( [ q.value for q in shortlist if q.party_att in maj_party_standard_labels ] , reverse=True )[ Seats_total_init]   
+PMM.plot_quotients_each_party( maj_party_standard_labels, 
+                               year=year, 
+                               Full_parl_Q = Full_parl_THRESH,
+                               partylist=parties, 
+                               fout=fout_figs_Qlist_majparties)
+
+print("Plotting Full quotient list sorted...")
+PMM.plot_all_quotients( maj_party_standard_labels, year, shortlist, fout_figs_Qlist_all)
+
+print("Plotting projected standings...")
 PMM.plot_projection( Standings_final, year, fout_figs_PMM_proj) 
 
 print("\nPMM program complete.")
