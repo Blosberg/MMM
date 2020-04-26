@@ -377,12 +377,19 @@ def plot_projection( Standings, year, fout):
         ax.add_artist(ab)
 
     # Add small marker line for each party to indicate their proportional seat #
+    propseat_linewidth=1
     for p in range(n_groups-1):
-        prop_seatnum = Standings["Vote_share"][p]*Seats_total_final
-        prop_seats   = plt.plot( [x_positions[p]-0.5*bar_width, x_positions[p]+(1.5*bar_width)],
-                                 [prop_seatnum,  prop_seatnum],
+        prop_seatnum_init  = Standings["Vote_share"][p]*Seats_total_init
+        prop_seats_init    = plt.plot( [x_positions[p]-0.5*bar_width, x_positions[p]+(0.5*bar_width)],
+                                 [prop_seatnum_init,  prop_seatnum_init],
                                  "-k",
-                                 linewidth=1.0 )
+                                 linewidth=propseat_linewidth )
+
+        prop_seatnum_final = Standings["Vote_share"][p]*Seats_total_final
+        prop_seats_final  = plt.plot( [x_positions[p]+0.5*bar_width, x_positions[p]+(1.5*bar_width)],
+                                 [prop_seatnum_final,  prop_seatnum_final],
+                                 "-k",
+                                 linewidth=propseat_linewidth )
     plt.tight_layout()
 
     # p=0
