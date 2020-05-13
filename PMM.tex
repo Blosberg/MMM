@@ -28,7 +28,7 @@
 \usepackage{hyperref}
 \usepackage[format=hang]{caption}
 \usepackage{caption}
-
+% \usepackage[sorting=none,style=numeric-comp]{biblatex}
 
 %====== added by BO 08.07.2016 ========================
 \usepackage{tcolorbox}
@@ -101,8 +101,8 @@
 %%----------------------------------------------------------------------------------------
 %	   BEGINNING MAIN ARTICLE: ABSTRACT
  \input{./02_main_article.tex}
-\input{./03_bib}
-
+\bibliography{03_bib}
+\bibliographystyle{ieeetr}
 %%----------------------------------------------------------------------------------------
 %           SUPPLEMENT
  \input{./04_SI}
