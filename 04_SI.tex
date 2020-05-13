@@ -77,7 +77,7 @@ To see how this imposes proportionality, first imagine the simplified case where
 \end{align}
 that is, party $m$'s share of the popular vote. 
 
-This simplified case is actually not far removed from realistic elections, where independent seats are relatively rare (i.e., $C^I=0$, frequently), and recent elections have shown minor parties obtaining only a few percentage points of popular support ($V^I \approx 0$). 
+This simplified case is actually not far removed from realistic elections, where independent seats are relatively rare (i.e., $C^I\approx0$, frequently), and recent elections have shown minor parties obtaining only a few percentage points of popular support ($V^I \approx 0$). 
 Nevertheless, our proposal must be robust and precise. Accounting for independent seats and votes, however, requires subtle discussion that is not limited to mathematics, as we see in the following section. 
 
 %----------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ What then is the `proportional' share of seats for party $X$?
 Traditional MM would suggest 50\% ($X$'s share of the valid major-party votes, 45/90), as supplemental seats are shared only among major parties. Alternatively, one might interpret `proportionality' to mean 47\% ($X$'s share of valid votes, 45/95), or 45\% ($X$'s share of the voting electorate, 45/100). 
 
 
-In the 2011 election, for example, both the NDP and Liberal parties were under-represented; it is difficult to argue that someone who voted for the Rhinoceros party, for example, would want their share of the popular vote used to provide compensatory seats to either of these parties \--indeed, such a voter explicitly voted \emph{against} these parties. 
+In the 2011 election, for example, both the NDP and Liberal parties were under-represented; it is difficult to argue that someone who voted for the Rhinoceros party, for example, would want their share of the popular vote used to provide compensatory seats to either the NDP or Liberal parties \--indeed, such a voter explicitly voted \emph{against} these parties. 
 Nor, however, did this voter explicitly support the over-represented Conservative party, either, suggesting a conundrum in which this voter's share of the popular vote cannot fairly be used for \emph{any} major party. 
 
 This is especially true if such a minor party won seats in local ridings elsewhere (since \emph{any} additional MPs are contrary to the interests of the few constituent representatives this minor party was able to obtain.) 
@@ -102,8 +102,9 @@ A voter who supports only that candidate would wish to prevent the addition of a
 
 Given these considerations, for the above hypothetical election, PMM takes the approach that if party $X$ receives 45\% of the total ballots \--\emph{including spoiled ballots and ballots cast for minor parties}\-- then it is entitled to 45\% of the parliamentary seats. 
 Spoiled, and minor-party 2nd ballots should default towards the preexisting results from the first ballot (i.e., the current FPP system), and serve to inhibit supplementary MPs altogether. 
+In practice, recent elections suggest that these `outlier' votes comprise about 2\% of ballots.
 
-In practice, recent elections suggest that these `outlier' votes comprise about 2\% of ballots, and the algorithm remains very much the same as in the standard D'Hondt process:
+With these considerations in mind, the algorithm remains very much the same as in the standard D'Hondt process, however the termination criteria is slightly different.
 
 \begin{enumerate}
 \item All FPP winners from 1st ballots are assigned seats. 
@@ -121,22 +122,25 @@ If indeed the party is owed more than 1 full seat, then both the party's supplem
 \item This proceeds until the above condition is no longer satisfied (i.e., until every party is owed a number of seats less than 1). 
 \end{enumerate}
 
-Termination of the above process will occur when quotients are very near to the threshold $Q_0,C_0$, however, since $\hat{V}$ and $\hat{N}$ include $V^I$ and $C^I$ respectively, the cutoff will be shifted slightly\footnote{Note, however, that this has no effect on the \emph{ordering} of the quotient list}.
-Generally, $V^I$ will drive the shift upwards, reducing the number of supplementary seats, however, with significant independent seats, the potential for $C^I$ to lower this threshold demonstrates the importance of measures against decoy lists described in the main text.
+This latter condition will arise when quotients are very near to the threshold $Q_0,C_0$, however, since $\hat{V}$ and $\hat{N}$ include $V^I$ and $C^I$ respectively, the cutoff will be shifted slightly\footnote{Note, however, that this has no effect on the \emph{ordering} of the quotient list}.
+Generally, $V^I$ will dominate, driving the shift upwards and reducing the number of supplementary seats.
+Conversely, however, with significant independent seats, the potential for $C^I$ to lower this threshold demonstrates the importance of measures against decoy lists described in the main text.
 
 The effect of spoiled and minor-party ballots is visible in figures~\ref{fig:projection_2011} and \ref{fig:projection_2015} of the main text where a black line shows the exact (i.e., non-integer) number of `seats' that should be associated with each party based on their popular support. 
-Each of the initially under-represented parties show a PMM projection slightly below (but within 1) of this line. The initially over-represented party is awarded no new seats, but retains a PMM projection slightly above its corresponding marker line.
-As stated in the main text, the prospect of obtaining this advantage preserves the incentive of parties to win regional races, as this advantage is partially preserved under PMM.
-Regional candidates may also be under pressure to put forward a serious campaign and garner 5\% of the vote to ensure their party remains eligible for 2nd ballots in the region (a possible threshold to prevent decoy lists, as discussed in the main text). 
+Each of the initially under-represented parties show a PMM projection slightly below (but within 1) of this line. The initially over-represented party is awarded no new seats, but retains a PMM projection somewhat above its corresponding marker line.
+As stated in the main text, the prospect of obtaining this advantage preserves the incentive of parties to win regional races, as this advantage is partially preserved under PMM, and regional candidates are then kept under pressure to put forward a serious campaign.
 
 All this serves to differentiate PMM from traditional MM models. 
 In Germany, for example, national parties have pitched election campaigns asking their supporters to \emph{only} give them their second vote, since their importance eclipses the riding races at the local level. First ballot riding races are then trivialized. 
-In PMM, parties still have an incentive to win the races in their local ridings.
+In PMM, major parties still have an incentive to win the races in their local ridings.
 
 % This is one further respect in which PMM defaults to preserving the main features of the existing system as much as possible while fixing only the problems that have been identified within it. 
 %====================================================
 
-The results from the 2015 Canadian federal election (in addition to the 2011, and 2019 results from the main text) are shown below. The software used to carry out these calculations and produce these figures is publicly available at https://github.com/Blosberg/PMM.
+The results from the 2015 Canadian federal election (in addition to the 2011, and 2019 results from the main text) are shown below. 
+The software used to carry out these calculations and produce these figures requires only the raw table data from Elections Canada and is publicly available at:
+[Link redacted].
+% https://github.com/Blosberg/PMM.
 
 \begin{figure}[h!]
 %\begin{figure}
@@ -168,7 +172,7 @@ FPP &\le& PMM &\le& MM
 \end{align}
 
 The inequalities above serve to highlight that PMM will entail more seats than FPP, but fewer than traditional MM, as employed in, for example, Germany. 
-Both the upper and lower limits of this system (i.e., standard FPP and MM models) have been tested and shown practical in a functioning democracy, while PMM seeks an optimal combination therein.
+Both the upper and lower limits of this system (i.e., standard FPP and MM models) have been tested and shown practical in a functioning democracy. PMM seeks an optimal combination therein and is constrained to ensure that it can never go beyond the limits of what has been tested and shown to work.
 
 % Finally, the 5\% threshold has been used as a filter of national support to limit supplementary seats to sincere and credible parties. 
 % The fact that this has the effect of encouraging parties to seek broad-based support throughout the country may be seen as a design feature, promoting national unity, however, it will likely be met with opposition be an established regional party such as the Bloc Quebecois. 
