@@ -12,12 +12,12 @@
 %----------------------------------------------------------------------------------------
 \section*{Supplemental Material}
 
-One challenge to creating proportionality in mixed-member (MM) systems is that there is no fair or practical way of \emph{removing} representatives from parties that are over-represented.
+One challenge to establishing proportionality in mixed-member (MM) systems is that there is no fair or practical way of \emph{removing} representatives from parties that are over-represented.
 Seats can be added, however, and so the additional member system (AMS) is another common name that highlights how MPs are added to an existing body to approach proportionality.
 Generally, the D'Hondt highest averages method is used for this process, which we briefly review now. None of the mathematical details presented here are necessary for the average voter to either (a) cast their ballot, or (b) appreciate the correspondence in proportionality between popular vote and final seat distribution.
 
 Assume a parliamentary body must represent $N$ constituencies, after an election involving $M$ major parties. A `major' party is defined as any party whose popular support exceeds the 5\% threshold on the 2nd ballot\footnote{Minor parties are ignored, so unless otherwise stated, `major' is implied. Likewise, a vote for a `party' refers to the 2nd ballot.}.
-The index  $m \in \left\{0, .., M-1\right\} $  refers to each of the $M$ parties specifically, and quotients $Q_{m,j}$ for each party $m$ are defined as
+The index  $m \in \left\{0, .., M-1\right\} $  denotes party, and for each party $m$, a list of quotients $Q_{m,j}$ are defined as
 
 \begin{equation}
 \label{eq:DhondtSupp}
@@ -51,7 +51,7 @@ The index $m$ is arbitrary, and thus we define it in order of relative constitue
 \begin{align}
 \label{eq:most_overrep}
 \frac{C_0/N}{V_0/\hat{V}} &\ge& \frac{C_m/N}{V_m/\hat{V}}, \\
-\frac{C_0}{V_0} &\ge& \frac{C_m}{V_m} && \forall \,\, m \neq 0.
+\frac{C_0}{V_0} &\ge& \frac{C_m}{V_m} && \forall \,\, m.
 \end{align}
 
 The quotient $Q_{0,C_0}$ is then the lowest quotient that corresponds to a constituent seat. To see this, note that from \ref{eq:DhondtSupp}, we have
@@ -72,13 +72,14 @@ To see how this imposes proportionality, first imagine the simplified case where
 
 \begin{align}
 \label{eq:seatshare}
-\frac{C_m+S_m}{ \sum\limits_k\left( C_k+S_k) \right)} &\to& \frac{V_m C_0/V_0^-}{ \sum\limits_k V_k C_0/V_0^-} \\
+\frac{C_m+S_m}{ \sum\limits_k\left( C_k+S_k \right)} &\to& \frac{V_m C_0/V_0^-}{ \sum\limits_k V_k C_0/V_0^-} \\
 &\to& \frac{V_m}{\hat{V}}^-,
 \end{align}
 that is, party $m$'s share of the popular vote.
 
-This simplified case is actually not far removed from realistic elections, where independent seats are relatively rare (i.e., $C^I\approx0$, frequently), and recent elections have shown minor parties obtaining only a few percentage points of popular support ($V^I \approx 0$).
-Nevertheless, our proposal must be robust and precise. Accounting for independent seats and votes, however, requires subtle discussion that is not limited to mathematics, as we see in the following section.
+This simplified case is actually not far removed from recent elections, where independent seats are relatively rare ($C^I\approx0$), and minor parties have obtained only a few percentage points of popular support ($V^I \approx 0$).
+%Nevertheless, our proposal must be robust and precise. %-- omitted.
+Accounting for independent seats and votes, however, requires subtle discussion that is not limited to mathematics, as we will see in the following section.
 
 %----------------------------------------------------------------------------------------
 %	Independent and spoiled
@@ -86,15 +87,16 @@ Nevertheless, our proposal must be robust and precise. Accounting for independen
 
 \section{Independent and Spoiled Ballots}
 \label{sec:outliers}
-Consider a hypothetical minimal `election' with 100 total ballots, 95 of which were valid, the other five of which were spoiled. Suppose party $X$ obtained 45 votes and remained under-represented against parties $Y$ and $Z$, who together obtained another 45 votes. The remaining 5 valid votes were cast for various small parties ($\alpha,\beta,$ etc. \ldots), each of which individually fell below the 5\% threshold required for supplementary seats.
+Consider a hypothetical minimal election with 100 total ballots, 95 of which were valid, the other five of which were spoiled. Suppose party $X$ obtained 45 votes and remained under-represented against parties $Y$ and $Z$, who together obtained another 45 votes. The remaining 5 valid votes were cast for various small parties ($\alpha,\beta,$ etc. \ldots), each of which fell below the 5\% threshold required for supplementary seats.
 What then is the `proportional' share of seats for party $X$?
 Traditional MM would suggest 50\% ($X$'s share of the valid major-party votes, 45/90), as supplemental seats are shared only among major parties. Alternatively, one might interpret `proportionality' to mean 47\% ($X$'s share of valid votes, 45/95), or 45\% ($X$'s share of the voting electorate, 45/100).
 
 
 In the 2011 election, for example, both the NDP and Liberal parties were under-represented; it is difficult to argue that someone who voted for the Rhinoceros party, for example, would want their share of the popular vote used to provide compensatory seats to either the NDP or Liberal parties \--indeed, such a voter explicitly voted \emph{against} these parties.
-Nor, however, did this voter support the over-represented Conservative party, either, suggesting a conundrum in which this voter's share of the popular vote cannot fairly be used for \emph{any} major party.
+Nor did this voter support the over-represented Conservative party, either, however each of the Conservative party’s seats has another justification based on constituency representation.
+As far as supplementary seating is concerned (the purpose of which is establishing proportionality), this voter’s share of the popular vote cannot fairly be used by \emph{any} major party.
 
-This is especially true if such a minor party won seats in local ridings. For example, in 2011 the Green Party failed to obtain 5\% of the popular vote and therefore would not qualify for supplementary seats. The Green Party did, however, obtain a single constituency seat, and therefore, \emph{any} additional MPs would serve to diminish the relative power of the Green Party's lone representative.
+This is especially true if such a minor party won constituency seats. For example, in 2011 the Green Party failed to obtain 5\% of the popular vote and therefore would not qualify for supplementary seats. The Green Party did, however, obtain a single constituency seat, and therefore, \emph{any} additional MPs would serve to diminish the relative power of the Green Party's lone representative.
 As such, the Green Party's 3.9\% of popular votes can hardly be used towards proportionality for other competing underrepresented parties.
 Hence, a parsimonious approach would suggest that the share of valid 2nd ballot votes cast for minor parties should be agnostic with respect to major parties, and default towards the existing FPP result from the 1st ballot. Such ballots then serve to inhibit \emph{all} major parties from obtaining supplementary seats.
 
@@ -103,7 +105,7 @@ A voter who supports only that candidate would wish to prevent the addition of a
 
 Given these considerations, for the above hypothetical election, PMM takes the approach that if party $X$ receives 45\% of the total ballots \--\emph{including spoiled ballots and ballots cast for minor parties}\-- then it is entitled to 45\% of the parliamentary seats.
 Spoiled, and minor-party 2nd ballots should default towards the preexisting results from the first ballot (i.e., the current FPP system), and serve to inhibit supplementary MPs altogether.
-In practice, recent elections suggest that these votes comprise about 2\% of ballots.
+In practice, recent elections suggest that these votes comprise about 2\% of ballots. Counting \emph{everyone} means counting them as well.
 
 With these considerations in mind, the algorithm remains very much the same as in the standard D'Hondt process, however the termination criteria is slightly different.
 
@@ -125,10 +127,11 @@ If indeed the party is owed more than 1 full seat, then both the party's supplem
 
 This latter condition will arise when quotients are very near to the threshold $Q_0,C_0$ defined by the lowest quotient associated with a  constituent seat. However, since $\hat{V}$ and $\hat{N}$ include $V^I$ and $C^I$ respectively, the cutoff will be shifted slightly\footnote{Note, however, that this has no effect on the \emph{ordering} of the quotient list}.
 Generally, $V^I$ will dominate, driving the shift upwards and reducing the number of supplementary seats.
-Conversely, however, with significant independent seats, the potential for $C^I$ to lower this threshold demonstrates the importance of measures to prohibit decoy lists, as described in the main text.
+Theoretically, however, a significant number of independent seats $C^I$ could lower this threshold, admitting further supplementary seats for major parties. 
+This latter effect demonstrates the importance of measures to discourage decoy lists, as described in the main text.
 
-The effect of spoiled and minor-party ballots is visible in figures~\ref{fig:projection_2011} and \ref{fig:projection_2015} of the main text where a black line shows the exact (i.e., non-integer) number of `seats' that should be associated with each party based on their popular support.
-Each of the initially under-represented parties show a PMM projection slightly below (but within 1) of this line. The initially over-represented party is awarded no new seats, but retains a PMM projection somewhat above its corresponding marker line.
+The effect of spoiled and minor-party ballots is visible in figures~\ref{fig:projection_2011} and \ref{fig:projection_2015} from the main text where a black line shows the exact (i.e., non-integer) number of `seats' that should be associated with each party based on their popular support.
+Each of the initially under-represented parties show a PMM projection slightly below (but within 1) of this line. The initially over-represented party is awarded no new seats but retains a PMM projection somewhat above its corresponding marker line.
 As stated in the main text, the prospect of obtaining this advantage preserves the incentive of parties to win regional races, as this advantage is partially preserved under PMM, and regional candidates are then kept under pressure to put forward a serious campaign.
 
 All this serves to differentiate PMM from traditional MM models.
@@ -139,7 +142,7 @@ In PMM, major parties still have an incentive to win the races in their local ri
 %====================================================
 
 The results from the 2015 Canadian federal election (in addition to the 2011, and 2019 results from the main text) are shown below.
-The software used to carry out these calculations and produce these figures requires only the raw table data from Elections Canada and is publicly available at:
+The software used to carry out these calculations and produce these figures automatically requires only the raw table data from Elections Canada and is publicly available at:
 [Link redacted].
 % https://github.com/Blosberg/PMM.
 
@@ -157,13 +160,13 @@ The software used to carry out these calculations and produce these figures requ
 %----------------------------------------------------------------------------------------
 \section{Extreme Split-Ballot Scenarios}
 
-Data from recent elections indicate that PMM would be sufficient to establish a representative parliament with minimal expansion, however, we can imagine pathological cases.
+Data from recent elections indicate that PMM would establish proportional representation with the addition of about 60 supplementary MPs in a typical election, however, we can imagine pathological cases.
 
 Consider the extreme case where an under-represented party, $X$, receives zero \--or few\-- constituency seats, and yet is awarded nearly 100\% of the second-ballot votes.
-Of course, this is exceedingly unlikely in practice, and would be even more implausible, given measures against decoy-lists (see conclusion, main text).
+Of course, this is exceedingly unlikely in practice and would be even more implausible given measures against decoy-lists (see conclusion, main text).
 Nevertheless, for this hypothetical scenario a truly proportional legislature would require adding an \emph{infinite} number of supplemental MPs from party \textbf{$X$}.
 
-To avoid this problem, a hard upper limit must be established \--for example, twice the number of constituencies. In our model, this quantity $\hat N \stackrel{!}{\le} N_{\textrm{max}} = 2 N$ is set as our upper-limit to ensure that constituent MPs are never in the minority, although more conservative constraints (i.e., smaller values of $N_{\textrm{max}}$) are also possible, and have been used in other MM systems.
+To avoid this problem, a hard upper limit to supplementary seats must be established \--for example, twice the number of constituencies. In our model, this quantity $\hat N \stackrel{!}{\le} N_{\textrm{max}} = 2 N$ is set as our upper-limit to ensure that constituent MPs are never in the minority, although more conservative constraints (i.e., smaller values of $N_{\textrm{max}}$) are also possible, and have been used in other MM systems.
 The general rule remains:
 
 \begin{align}
