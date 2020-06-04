@@ -105,9 +105,9 @@ A voter who supports only that candidate would wish to prevent the addition of a
 
 Given these considerations, for the above hypothetical election, PMM takes the approach that if party $X$ receives 45\% of the total ballots \--\emph{including spoiled ballots and ballots cast for minor parties}\-- then it is entitled to 45\% of the parliamentary seats.
 Spoiled, and minor-party 2nd ballots should default towards the preexisting results from the first ballot (i.e., the current FPP system), and serve to inhibit supplementary MPs altogether.
-In practice, recent elections suggest that these votes comprise about 2\% of ballots. Counting \emph{everyone} means counting them as well.
+In practice, recent elections suggest that these votes usually comprise about 2-4\% of ballots. Counting \emph{everyone} means counting them as well.
 
-With these considerations in mind, the algorithm remains very much the same as in the standard D'Hondt process, however the termination criteria is slightly different.
+With these considerations in mind, the algorithm remains very much the same as in the standard D'Hondt process, however the termination criterion is slightly different.
 
 \begin{enumerate}
 \item All FPP winners from 1st ballots are assigned seats.
@@ -120,7 +120,7 @@ Each major party seat is associated with a quotient from their party's list, in 
 \end{align}
 
 One might read the left side of Eq.~\ref{eq:Qowed1seat} as `the number of seats party $m$ should expect, based on proportionality, less the number of seats it currently has'.
-If indeed the party is owed more than 1 full seat, then both the party's supplementary seat count ($S_m$), and the size of parliament ($\hat{N}$) are incremented by one, and the next quotient is considered.
+If indeed the party is owed at least 1 full seat, then both the party's supplementary seat count ($S_m$), and the size of parliament ($\hat{N}$) are incremented by one, and the next quotient is considered.
 
 \item This proceeds until the above condition is no longer satisfied (i.e., until every party is owed a number of seats less than 1).
 \end{enumerate}
